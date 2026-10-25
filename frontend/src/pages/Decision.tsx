@@ -9,6 +9,9 @@ import type { Report } from "../types";
 
 const PLAY_MS = 900;
 
+/** "edd-policy@v4#2.1" -> "v4 §2.1" */
+const shortVersion = (chunkId: string) => chunkId.replace(/^(.*)@v(\d+)#(.*)$/, "v$2 §$3");
+
 export default function Decision({ runId }: { runId: string }) {
   const [report, setReport] = useState<Report | null>(null);
   const [replay, setReplay] = useState<Report | null>(null);
@@ -24,25 +27,49 @@ export default function Decision({ runId }: { runId: string }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const timer = useRef<number | null>(null);
+  // set when a report for the next run is already in hand (after a fork or resume)
+  const preloaded = useRef<string | null>(null);
 
-  const load = useCallback(async () => {
-    try {
-      const rep = await api.report(runId);
-      setReport(rep);
-      setVisibleStep(rep.last_step);
-      setReplay(rep.replay ? await api.report(rep.replay.run_id) : null);
+  // Show a report. The page stays mounted when the run changes, so the graph keeps its
+  // nodes and animates from the old run to the new one instead of reloading.
+  // `playFrom` replays the new run from that step to its end.
+  const show = useCallback(async (rep: Report, playFrom?: number) => {
+    stop();
+    setReport(rep);
+    setMode("run");
+    setSimPause(false);
+    setBpPassed(false);
+    setError(null);
+    setSelected((cur) => {
+      if (cur && (rep.claims[cur] || rep.graph.nodes.some((n) => n.id === cur))) return cur;
       const firstBad = Object.values(rep.evidence).find((e) => e.version_status === "retired");
-      setSelected(firstBad ? firstBad.id : "decision" in rep.claims ? "decision" : null);
-      setError(null);
-    } catch (e) {
-      setError((e as Error).message);
-    }
-  }, [runId]);
+      return firstBad ? firstBad.id : "decision" in rep.claims ? "decision" : null;
+    });
+    if (playFrom !== undefined) startPlay(rep.last_step, playFrom, null, true);
+    else setVisibleStep(rep.last_step);
+    setReplay(rep.replay ? await api.report(rep.replay.run_id) : null);
+  }, []);
 
   useEffect(() => {
-    load();
-    return () => stop();
-  }, [load]);
+    if (preloaded.current === runId) {
+      preloaded.current = null;
+      return;
+    }
+    let live = true;
+    api
+      .report(runId)
+      .then((rep) => {
+        if (live) show(rep);
+      })
+      .catch((e: Error) => {
+        if (live) setError(e.message);
+      });
+    return () => {
+      live = false;
+    };
+  }, [runId, show]);
+
+  useEffect(() => () => stop(), []);
 
   const shown = mode === "now" && replay ? replay : report;
 
@@ -58,20 +85,18 @@ export default function Decision({ runId }: { runId: string }) {
     setPlaying(false);
   }
 
-  function play() {
-    if (!shown) return;
-    if (playing) return stop();
-    setSimPause(false);
-    const max = shown.last_step;
-    let step = visibleStep >= max ? 0 : visibleStep;
-    let passed = visibleStep >= max ? false : bpPassed;
-    setBpPassed(passed);
+  /** Advance the scrubber one step every PLAY_MS from `from` to `max`, stopping once at `sim` (a simulated breakpoint). */
+  function startPlay(max: number, from: number, sim: number | null, passedAlready: boolean) {
+    stop();
+    let step = from;
+    let passed = passedAlready;
     setVisibleStep(step);
+    if (step >= max) return;
     setPlaying(true);
     timer.current = window.setInterval(() => {
       step += 1;
       setVisibleStep(step);
-      if (simStep && !passed && step === simStep) {
+      if (sim && !passed && step === sim) {
         passed = true;
         setBpPassed(true);
         setSimPause(true);
@@ -80,6 +105,17 @@ export default function Decision({ runId }: { runId: string }) {
       }
       if (step >= max) stop();
     }, PLAY_MS);
+  }
+
+  function play() {
+    if (!shown) return;
+    if (playing) return stop();
+    setSimPause(false);
+    const max = shown.last_step;
+    const restart = visibleStep >= max;
+    const passed = restart ? false : bpPassed;
+    setBpPassed(passed);
+    startPlay(max, restart ? 0 : visibleStep, simStep, passed);
   }
 
   async function act<T>(fn: () => Promise<T>, then: (v: T) => void) {
@@ -93,9 +129,13 @@ export default function Decision({ runId }: { runId: string }) {
     }
   }
 
-  const openRun = (rep: Report) => {
-    if (rep.run.id === runId) load();
-    else go(runPath(rep.run.id));
+  /** Show the run an action produced, in place, and play it on from `playFrom`. */
+  const openRun = (rep: Report, playFrom?: number) => {
+    if (rep.run.id !== runId) {
+      preloaded.current = rep.run.id;
+      go(runPath(rep.run.id));
+    }
+    show(rep, playFrom);
   };
 
   const stats = useMemo(() => {
@@ -122,12 +162,14 @@ export default function Decision({ runId }: { runId: string }) {
         : shown.read.headline;
   const subhead =
     mode === "now" && replay && report.replay
-      ? `Replayed from step ${report.replay.from_step} with ${Object.values(report.replay.swaps).map((s) => s.replace(/^(.*)@v(\d+)#(.*)$/, "v$2 §$3")).join(", ")}. Steps 1 to ${report.replay.from_step - 1} were reused unchanged.`
+      ? `Replayed from step ${report.replay.from_step} with ${Object.values(report.replay.swaps).map(shortVersion).join(", ")}. Steps 1 to ${report.replay.from_step - 1} were reused unchanged.`
       : realPause
         ? `Paused at step ${run.paused_at}. Choose how to continue.`
         : fw
           ? `First went wrong at step ${fw.step}, when the ${fw.agent} read a replaced source. Every span still reported success.`
-          : "No step read a replaced source.";
+          : report.parent && run.forked_at
+            ? `Forked from ${report.parent.id} at step ${run.forked_at}${Object.keys(run.options.swaps ?? {}).length ? ` with ${Object.values(run.options.swaps ?? {}).map(shortVersion).join(", ")}` : ""}. Steps 1 to ${run.forked_at - 1} were reused.`
+            : "No step read a replaced source.";
 
   return (
     <main className="page decision">
@@ -233,20 +275,20 @@ export default function Decision({ runId }: { runId: string }) {
                 {realPause ? (
                   <>
                     {pauseEvent?.detail.suggested_swaps && (
-                      <button type="button" className="btn btn-dark" disabled={busy} onClick={() => act(() => api.resume(run.id, "edit", pauseEvent?.detail.suggested_swaps), openRun)}>
+                      <button type="button" className="btn btn-dark" disabled={busy} onClick={() => act(() => api.resume(run.id, "edit", pauseEvent?.detail.suggested_swaps), (r) => openRun(r, run.paused_at ?? undefined))}>
                         Swap in the current version
                       </button>
                     )}
-                    <button type="button" className="btn btn-light-line" disabled={busy} onClick={() => act(() => api.resume(run.id, "approve"), openRun)}>
+                    <button type="button" className="btn btn-light-line" disabled={busy} onClick={() => act(() => api.resume(run.id, "approve"), (r) => openRun(r, run.paused_at ?? undefined))}>
                       Approve and continue
                     </button>
-                    <button type="button" className="btn btn-light-line" disabled={busy} onClick={() => act(() => api.resume(run.id, "reject"), openRun)}>
+                    <button type="button" className="btn btn-light-line" disabled={busy} onClick={() => act(() => api.resume(run.id, "reject"), (r) => openRun(r))}>
                       Reject
                     </button>
                   </>
                 ) : (
                   <>
-                    <button type="button" className="btn btn-dark" disabled={busy} onClick={() => act(() => api.fork(run.id, simStep!, report.replay?.swaps ?? {}, "forked at breakpoint"), openRun)}>
+                    <button type="button" className="btn btn-dark" disabled={busy} onClick={() => act(() => api.fork(run.id, simStep!, report.replay?.swaps ?? {}, "forked at breakpoint"), (r) => openRun(r, simStep!))}>
                       Fork with the current version
                     </button>
                     <button type="button" className="btn btn-light-line" onClick={() => { setSimPause(false); play(); }}>
@@ -308,7 +350,7 @@ export default function Decision({ runId }: { runId: string }) {
           </div>
         </div>
 
-        <Branches report={report} current={runId} />
+        <Branches report={report} />
 
         <section className="tiles" aria-label="Claims summary">
           <div className="card tile">
@@ -386,8 +428,11 @@ function ClaimsTable({ report }: { report: Report }) {
   );
 }
 
-function Branches({ report, current }: { report: Report; current: string }) {
-  const items = [
+// Built only from the report on screen: while the next run loads, `runId` is already the
+// new id but the report is still the old one, and mixing the two would repeat a run.
+function Branches({ report }: { report: Report }) {
+  const current = report.run.id;
+  const all = [
     ...(report.parent ? [{ id: report.parent.id, text: `Parent run`, sub: runStatusWord[report.parent.status] }] : []),
     { id: current, text: "This run", sub: runStatusWord[report.run.status] },
     ...report.forks.map((f) => ({
@@ -396,6 +441,7 @@ function Branches({ report, current }: { report: Report; current: string }) {
       sub: f.fork_reason ?? "",
     })),
   ];
+  const items = all.filter((b, i) => all.findIndex((x) => x.id === b.id) === i);
   if (items.length < 2) return null;
   return (
     <nav className="branches" aria-label="Forks of this run">

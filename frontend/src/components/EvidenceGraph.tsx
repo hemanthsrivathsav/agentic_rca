@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { edgePath, layoutGraph } from "../layout";
+import { edgePath, layoutGraph, naturalWidth, type Placed } from "../layout";
 import { claimName, decisionWord, statusWord } from "../format";
 import type { Report } from "../types";
 
@@ -19,9 +19,22 @@ interface Props {
   children?: ReactNode; // overlays (pause card)
 }
 
+const WRAP_PADDING = 24; // .graph-wrap horizontal padding
+const MAX_SPREAD = 1.35; // widest the columns spread, relative to the natural width
+const MAX_SCALE = 1.35; // largest zoom on very wide canvases
+
 const versionOf = (label: string) => Number(label.match(/ v(\d+) /)?.[1] ?? 1);
 
-/** Columns are agents, rows are steps; size shows how much a node drove the decision. */
+function EvidenceNote({ n }: { n: Placed }) {
+  if (n.status === "retired") return <span className="dot-note bad">retired, {n.days_out_of_date} days old</span>;
+  if (n.status === "not_retrieved") return <span className="dot-note good">in force, replaces v{versionOf(n.label) - 1}; not retrieved</span>;
+  if (n.status === "swapped_out") return <span className="dot-note">swapped out in this run</span>;
+  if (n.swapped_in) return <span className="dot-note good">swapped in for v{versionOf(n.label) - 1}</span>;
+  if (n.kind === "tool") return <span className="dot-note">tool result</span>;
+  return null;
+}
+
+/** Evidence on the left, one column per agent, the outcome on the right; size shows how much a node drove the decision. */
 export default function EvidenceGraph({ report, tone, visibleStep, selected, onSelect, filters, children }: Props) {
   const { columns, nodes, edges } = report.graph;
   const shownNodes = useMemo(
@@ -33,18 +46,23 @@ export default function EvidenceGraph({ report, tone, visibleStep, selected, onS
       }),
     [nodes, filters],
   );
-  const layout = useMemo(() => layoutGraph(columns, shownNodes), [columns, shownNodes]);
 
-  // scale the stage down to fit narrow containers (never below 0.7; then scroll)
+  // Fit the graph to the canvas. Narrow: scale down (never below 0.7; then scroll).
+  // Wide: first spread the columns apart, then scale up so text stays readable on big screens.
   const wrap = useRef<HTMLDivElement>(null);
-  const [scale, setScale] = useState(1);
+  const [avail, setAvail] = useState(0);
   useEffect(() => {
     const el = wrap.current;
     if (!el) return;
-    const ro = new ResizeObserver(() => setScale(Math.max(0.7, Math.min(1, el.clientWidth / layout.width))));
+    const ro = new ResizeObserver(() => setAvail(el.clientWidth - WRAP_PADDING));
     ro.observe(el);
     return () => ro.disconnect();
-  }, [layout.width]);
+  }, []);
+  const natural = naturalWidth(columns.length);
+  const spread = avail > natural ? Math.min(avail, natural * MAX_SPREAD) : natural;
+  const scale = avail <= 0 ? 1 : avail <= natural ? Math.max(0.7, avail / natural) : Math.min(MAX_SCALE, avail / spread);
+  const extra = spread - natural;
+  const layout = useMemo(() => layoutGraph(columns, shownNodes, edges, extra), [columns, shownNodes, edges, extra]);
 
   const visible = (id: string) => (layout.byId[id]?.step ?? 99) <= visibleStep;
   // On the decision path: replaced links glow coral, current links glow teal
@@ -56,16 +74,14 @@ export default function EvidenceGraph({ report, tone, visibleStep, selected, onS
     <div className="graph-wrap" ref={wrap}>
       <div className="graph-sizer" style={{ width: layout.width * scale, height: layout.height * scale }}>
         <div className="graph-stage" style={{ width: layout.width, height: layout.height, transform: `scale(${scale})` }}>
-          {layout.columns.map((c, i) => (
-            <div key={c.name} className="col-head" style={{ left: i === 0 ? 8 : c.x - 80, width: i === 0 ? 200 : 160, textAlign: i === 0 ? "left" : "center" }}>
-              {c.name}
-            </div>
-          ))}
-          {layout.rowTops.map((r) => (
-            <div key={r.step} className="row-rule" style={{ top: r.top }} aria-hidden="true">
-              <span>Step {r.step}</span>
-            </div>
-          ))}
+          {layout.columns.map((c, i) => {
+            const half = i === 0 ? c.x : 80;
+            return (
+              <div key={c.name} className="col-head" style={{ left: c.x - half, width: half * 2 }}>
+                {c.name}
+              </div>
+            );
+          })}
 
           <svg className="edges" width={layout.width} height={layout.height} aria-hidden="true">
             {edges.map((e) => {
@@ -79,17 +95,25 @@ export default function EvidenceGraph({ report, tone, visibleStep, selected, onS
                 e.type === "replaces"
                   ? "edge edge-replaces"
                   : e.type === "context"
-                    ? "edge edge-context"
+                    ? a.status === "nosource"
+                      ? "edge edge-nosource"
+                      : "edge edge-context"
                     : e.on_path
                       ? `edge edge-path ${flowTone(e.status)}`
                       : e.status === "replaced"
                         ? "edge edge-bad"
                         : "edge edge-drove";
               const w = e.type === "drove" ? 1.25 + (e.share ?? 0) * 2.25 : 1.25;
+              const [top, low] = a.y < b.y ? [a, b] : [b, a];
               return (
                 <g key={`${e.from}-${e.to}`} className={on ? "" : "is-hidden"}>
                   <path d={d} className={cls} strokeWidth={w} />
                   {e.on_path && <path d={d} className={`edge-flow ${flowTone(e.status)}`} />}
+                  {e.type === "replaces" && (
+                    <text className="edge-label" x={top.x - 10} y={(top.y + top.h / 2 + low.y - low.h / 2) / 2 + 4} textAnchor="end">
+                      replaces
+                    </text>
+                  )}
                 </g>
               );
             })}
@@ -134,11 +158,10 @@ export default function EvidenceGraph({ report, tone, visibleStep, selected, onS
                     {decisionWord(String(n.value ?? ""))}
                   </div>
                 ) : (
-                  <div className="dot-label" style={{ left: n.w + 10, top: n.h / 2 - 10 }}>
+                  // to the right of the dot, under the edge that leaves it
+                  <div className="dot-label" style={{ left: n.w + 8, top: n.h / 2 + 3 }}>
                     <span className="dot-title">{n.label}</span>
-                    {n.status === "retired" && <span className="dot-note bad">retired, {n.days_out_of_date} days old</span>}
-                    {n.status === "not_retrieved" && <span className="dot-note good">in force, replaces v{versionOf(n.label) - 1}; not retrieved</span>}
-                    {n.kind === "tool" && <span className="dot-note">tool result</span>}
+                    <EvidenceNote n={n} />
                   </div>
                 )}
               </div>

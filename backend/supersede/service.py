@@ -10,7 +10,7 @@ from __future__ import annotations
 import os
 
 from .llm import AzureOpenAIClient
-from .provenance import Analyzer, fmt_day, state_diff
+from .provenance import REPORT_VERSION, Analyzer, fmt_day, state_diff
 from .rules import default_rules
 from .runtime import Runner
 from .store import SQLiteStore, Store
@@ -58,7 +58,8 @@ class Supersede:
         if not run:
             raise KeyError(run_id)
         cached = None if refresh else self.store.analysis(run_id)
-        if cached and cached["run"]["status"] == run["status"] and cached["run"]["paused_at"] == run["paused_at"]:
+        if (cached and cached.get("version") == REPORT_VERSION
+                and cached["run"]["status"] == run["status"] and cached["run"]["paused_at"] == run["paused_at"]):
             rep = cached
         else:
             rep = self.analyzer.analyze(run_id, samples=self.samples)

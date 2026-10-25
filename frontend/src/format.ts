@@ -39,6 +39,7 @@ export const statusWord: Record<Status, string> = {
   nosource: "No source",
   not_retrieved: "Not retrieved",
   not_yet_effective: "Not yet in force",
+  swapped_out: "Swapped out",
 };
 
 export const runStatusWord: Record<RunStatus, string> = {

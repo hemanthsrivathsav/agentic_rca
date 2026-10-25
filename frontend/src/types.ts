@@ -1,6 +1,6 @@
 // Shapes returned by the Supersede API (backend/supersede/service.py).
 
-export type Status = "current" | "replaced" | "nosource" | "retired" | "not_retrieved" | "not_yet_effective";
+export type Status = "current" | "replaced" | "nosource" | "retired" | "not_retrieved" | "not_yet_effective" | "swapped_out";
 export type RunStatus = "running" | "paused" | "completed" | "rejected" | "forked";
 export type Finding =
   | "healthy"
@@ -125,6 +125,7 @@ export interface GraphNode {
   on_path: boolean;
   retired_on?: string | null;
   days_out_of_date?: number;
+  swapped_in?: boolean; // a fork put this version in place of an older one
 }
 
 export interface GraphEdge {

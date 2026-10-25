@@ -20,7 +20,8 @@ export default function App() {
   return (
     <div className="app">
       <Header active={runMatch ? "decision" : "runs"} />
-      {runMatch ? <Decision key={runMatch[1]} runId={decodeURIComponent(runMatch[1])} /> : <Overview />}
+      {/* not keyed by run id: moving between a run and its forks animates instead of reloading */}
+      {runMatch ? <Decision runId={decodeURIComponent(runMatch[1])} /> : <Overview />}
     </div>
   );
 }

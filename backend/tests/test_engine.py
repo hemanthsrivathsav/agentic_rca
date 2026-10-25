@@ -95,6 +95,15 @@ class RunTests(unittest.TestCase):
         self.assertEqual(g["columns"][0], "Evidence")
         self.assertEqual(g["columns"][-1], "Outcome")
 
+    def test_replay_graph_keeps_swapped_out_version(self):
+        # the run and its replay draw the same nodes, so the UI can animate between them
+        rep = self.s.report("KYC-2041")
+        child = self.s.report(rep["replay"]["run_id"])["graph"]
+        nodes = {n["id"]: n for n in child["nodes"]}
+        self.assertEqual(nodes[f"ev:{V3}"]["status"], "swapped_out")
+        self.assertTrue(nodes[f"ev:{V4}"]["swapped_in"])
+        self.assertEqual(set(nodes), {n["id"] for n in rep["graph"]["nodes"]})
+
 
 class BreakpointTests(unittest.TestCase):
     def setUp(self):

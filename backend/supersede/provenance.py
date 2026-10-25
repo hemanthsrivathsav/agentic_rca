@@ -27,6 +27,7 @@ from .util import now_iso, parse_day, similarity
 DROVE_SHARE = 0.2     # an input "drove" a claim if it explains >= 20% of the change
 MIN_CHANGE = 0.05     # ...and hiding it changed the claim by at least 5%
 REPLAY_REASON = "replay with current versions"
+REPORT_VERSION = 2    # bump when the report shape changes, so cached analyses are rebuilt
 
 FINDINGS = {
     "healthy": "All evidence current",
@@ -220,6 +221,7 @@ class Analyzer:
             first_wrong = {"step": entered, "agent": self.wf.step(entered).agent, "label": self.wf.step(entered).label}
 
         report = {
+            "version": REPORT_VERSION,
             "run": run,
             "analysed_at": now_iso(),
             "last_step": last,
@@ -313,6 +315,7 @@ class Analyzer:
                 agents.append(s.agent)
         columns = ["Evidence", *agents, "Outcome"]
         claims, evidence, path = report["claims"], report["evidence"], set(report["decision_path"])
+        swaps = report["run"]["options"].get("swaps", {})
         nodes, edges = [], []
 
         # influence on the decision for sizing: max share along any driving edge
@@ -327,6 +330,7 @@ class Analyzer:
                 "column": 0, "step": ev["step"], "agent": ev["agent"],
                 "status": ev.get("version_status", "current"), "weight": weight.get(ev["id"], 0.0),
                 "on_path": ev["id"] in path, "retired_on": ev.get("retired_on"), "days_out_of_date": ev.get("days_out_of_date", 0),
+                "swapped_in": ev.get("chunk_id") in swaps.values(),
             })
             if ev.get("version_status") == "retired" and ev.get("current_id"):
                 cur = self.kb.get(ev["current_id"])
@@ -336,6 +340,18 @@ class Analyzer:
                                   "step": ev["step"], "agent": None, "status": "not_retrieved", "weight": 0.0, "on_path": False,
                                   "retired_on": None, "days_out_of_date": 0})
                 edges.append({"from": rid, "to": ev["id"], "type": "replaces", "share": None, "on_path": False, "status": "replaces"})
+
+        # A fork that swapped evidence keeps the version it swapped out, so a run
+        # and its forks draw the same nodes and the UI can animate between them.
+        for old, new in swaps.items():
+            nid, oid = f"ev:{new}", f"ev:{old}"
+            if nid not in evidence or oid in evidence or old not in self.kb.chunks:
+                continue
+            gone = self.kb.get(old)
+            nodes.append({"id": oid, "type": "evidence", "kind": "chunk", "label": gone.label, "text": gone.text, "column": 0,
+                          "step": evidence[nid]["step"], "agent": None, "status": "swapped_out", "weight": 0.0, "on_path": False,
+                          "retired_on": gone.retired_on, "days_out_of_date": self.kb.days_out_of_date(old, report["run"]["run_time"])})
+            edges.append({"from": nid, "to": oid, "type": "replaces", "share": None, "on_path": False, "status": "replaces"})
 
         for c in sorted(claims.values(), key=lambda c: (c["step"], c["id"])):
             col = len(columns) - 1 if c["kind"] == "decision" else 1 + agents.index(c["agent"])

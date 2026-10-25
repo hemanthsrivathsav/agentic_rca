@@ -10,6 +10,7 @@ const chipTone: Record<Status, string> = {
   nosource: "warn",
   not_retrieved: "quiet",
   not_yet_effective: "quiet",
+  swapped_out: "quiet",
 };
 
 export function AnalystRead({ report }: { report: Report }) {
@@ -57,7 +58,17 @@ export function NodeDetail({ report, id }: { report: Report; id: string | null }
       <div className="row between gap-8 start">
         <div>
           <div className="muted small">
-            {claim ? (claim.kind === "decision" ? "Outcome" : `Claim by the ${claim.agent}`) : ev ? (ev.kind === "tool" ? "Tool result" : "Document") : "Document, not retrieved"}
+            {claim
+              ? claim.kind === "decision"
+                ? "Outcome"
+                : `Claim by the ${claim.agent}`
+              : ev
+                ? ev.kind === "tool"
+                  ? "Tool result"
+                  : "Document"
+                : node?.status === "swapped_out"
+                  ? "Document, swapped out"
+                  : "Document, not retrieved"}
           </div>
           <h3 className="h3">{claim ? claimName(id) : (node?.label ?? id)}</h3>
         </div>
@@ -71,6 +82,7 @@ export function NodeDetail({ report, id }: { report: Report; id: string | null }
         </p>
       )}
       {node?.status === "not_retrieved" && <p className="small muted">This is the version in force on the run date. The agent never saw it.</p>}
+      {node?.status === "swapped_out" && <p className="small muted">This run was forked with the current version in its place, so the agents never saw this one.</p>}
 
       {claim && drovers.length > 0 && (
         <div>
