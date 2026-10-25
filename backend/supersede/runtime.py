@@ -248,15 +248,22 @@ class Runner:
 
         Steps before ``from_step`` are reused: their checkpoints and spans are
         copied (spans marked ``cached``) so the fork is a complete run.
+
+        If the run already has a fork from the same step with the same options
+        (same swaps, breakpoints, guard ...), that fork is returned instead of
+        running an identical copy.
         """
         parent = self._require(run_id)
         if not 1 <= from_step <= self.workflow.size:
             raise ValueError("from_step out of range")
-        new_id_ = run_new_id or new_id("run")
         opts = copy.deepcopy(parent["options"])
         opts.pop("ack", None)
         opts["swaps"] = {**opts.get("swaps", {}), **(swaps or {})}
         opts.update(options or {})
+        same = next((c for c in self.store.children(run_id) if c["forked_at"] == from_step and c["options"] == opts), None)
+        if same and not run_new_id:
+            return same["id"]
+        new_id_ = run_new_id or new_id("run")
         self.store.create_run({
             "id": new_id_, "workflow": parent["workflow"], "subject": parent["subject"], "status": "running",
             "run_time": parent["run_time"], "parent_run_id": run_id, "forked_at": from_step, "fork_reason": reason,

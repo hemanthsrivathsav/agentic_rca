@@ -107,6 +107,22 @@ export default function Decision({ runId }: { runId: string }) {
     }, PLAY_MS);
   }
 
+  /** At the simulated breakpoint: carry on with the current version, like design v2.
+   * The automatic replay is exactly this fork (same step, same swap), and it is
+   * already loaded, so switch to it and keep playing on the same graph: the evidence
+   * re-points from v3 to v4 and the toggle moves to "With current versions". */
+  function forkAndContinue() {
+    if (!report || !simStep) return;
+    if (replay) {
+      setSimPause(false);
+      setMode("now");
+      startPlay(replay.last_step, simStep, null, true);
+      return;
+    }
+    // replay not loaded (should not happen): make the fork on the server and open it
+    act(() => api.fork(report.run.id, simStep, report.replay?.swaps ?? {}, "forked at breakpoint"), (r) => openRun(r, simStep));
+  }
+
   function play() {
     if (!shown) return;
     if (playing) return stop();
@@ -258,6 +274,8 @@ export default function Decision({ runId }: { runId: string }) {
             </div>
           </div>
 
+          {/* The pause card floats over the graph (as in design v2), so showing or hiding it never moves the page. */}
+          <div className="canvas-body">
           {view === "graph" ? (
             <EvidenceGraph report={shown} tone={mode} visibleStep={visibleStep} selected={selected} onSelect={setSelected} filters={filters} />
           ) : (
@@ -288,8 +306,8 @@ export default function Decision({ runId }: { runId: string }) {
                   </>
                 ) : (
                   <>
-                    <button type="button" className="btn btn-dark" disabled={busy} onClick={() => act(() => api.fork(run.id, simStep!, report.replay?.swaps ?? {}, "forked at breakpoint"), (r) => openRun(r, simStep!))}>
-                      Fork with the current version
+                    <button type="button" className="btn btn-dark" disabled={busy} onClick={forkAndContinue}>
+                      {report.replay ? `Fork with ${Object.values(report.replay.swaps).map(shortVersion).join(", ")} and continue` : "Fork with the current version"}
                     </button>
                     <button type="button" className="btn btn-light-line" onClick={() => { setSimPause(false); play(); }}>
                       Continue as it ran
@@ -299,6 +317,7 @@ export default function Decision({ runId }: { runId: string }) {
               </div>
             </div>
           )}
+          </div>
 
           <div className="scrubber">
             <button type="button" className="play" onClick={play} aria-label={playing ? "Pause" : "Play the run step by step"}>

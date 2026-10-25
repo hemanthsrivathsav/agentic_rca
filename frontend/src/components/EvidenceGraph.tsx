@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { edgePath, layoutGraph, naturalWidth, type Placed } from "../layout";
+import { layoutGraph, routeEdges, type Placed } from "../layout";
 import { claimName, decisionWord, statusWord } from "../format";
 import type { Report } from "../types";
 
@@ -58,11 +58,19 @@ export default function EvidenceGraph({ report, tone, visibleStep, selected, onS
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
-  const natural = naturalWidth(columns.length);
+  // the natural width depends on the graph (lanes widen to fit their edges), so lay out once unspread
+  const base = useMemo(() => layoutGraph(columns, shownNodes, edges, 0), [columns, shownNodes, edges]);
+  const natural = base.width;
   const spread = avail > natural ? Math.min(avail, natural * MAX_SPREAD) : natural;
   const scale = avail <= 0 ? 1 : avail <= natural ? Math.max(0.7, avail / natural) : Math.min(MAX_SCALE, avail / spread);
   const extra = spread - natural;
-  const layout = useMemo(() => layoutGraph(columns, shownNodes, edges, extra), [columns, shownNodes, edges, extra]);
+  const layout = useMemo(() => (extra > 0 ? layoutGraph(columns, shownNodes, edges, extra) : base), [base, columns, shownNodes, edges, extra]);
+  // route only the edges on screen, so hidden ones do not take up ports or lane slots
+  const shownEdges = useMemo(
+    () => edges.filter((e) => layout.byId[e.from] && layout.byId[e.to] && (e.type !== "context" || filters.context)),
+    [edges, layout, filters.context],
+  );
+  const routes = useMemo(() => routeEdges(layout, shownEdges), [layout, shownEdges]);
 
   const visible = (id: string) => (layout.byId[id]?.step ?? 99) <= visibleStep;
   // On the decision path: replaced links glow coral, current links glow teal
@@ -84,12 +92,11 @@ export default function EvidenceGraph({ report, tone, visibleStep, selected, onS
           })}
 
           <svg className="edges" width={layout.width} height={layout.height} aria-hidden="true">
-            {edges.map((e) => {
+            {shownEdges.map((e) => {
               const a = layout.byId[e.from];
               const b = layout.byId[e.to];
-              if (!a || !b) return null;
-              if (e.type === "context" && !filters.context) return null;
-              const d = edgePath(e, a, b);
+              const d = routes[`${e.from}-${e.to}`]?.d;
+              if (!d) return null;
               const on = visible(e.from) && visible(e.to);
               const cls =
                 e.type === "replaces"

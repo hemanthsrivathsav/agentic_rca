@@ -1,5 +1,6 @@
 """Engine tests. Standard library only: run with ``python -m unittest`` from backend/."""
 
+import threading
 import unittest
 
 from supersede.demo import kyc
@@ -175,6 +176,30 @@ class ServiceTests(unittest.TestCase):
         self.assertEqual(out["feedback"][0]["verdict"], "wrong")
         with self.assertRaises(ValueError):
             s.add_feedback("KYC-2041", "maybe")
+
+    def test_concurrent_reports_make_one_replay(self):
+        # The UI can ask for a new run's report twice at once; that used to make two
+        # replays. The service lock and fork reuse each prevent it on their own.
+        s = service()
+        threads = [threading.Thread(target=s.report, args=("KYC-2041",)) for _ in range(4)]
+        for t in threads:
+            t.start()
+        for t in threads:
+            t.join()
+        self.assertEqual(len(s.store.children("KYC-2041")), 1)
+
+    def test_identical_fork_is_reused(self):
+        s = service()
+        replay = s.report("KYC-2041")["replay"]["run_id"]
+        # forking at the breakpoint with v4 is exactly what the replay already did
+        first = s.fork("KYC-2041", from_step=3, swaps={V3: V4}, reason="forked at breakpoint")
+        again = s.fork("KYC-2041", from_step=3, swaps={V3: V4}, reason="forked at breakpoint")
+        self.assertEqual(first["run"]["id"], replay)
+        self.assertEqual(again["run"]["id"], replay)
+        # a different fork (another step) is still a new run
+        other = s.fork("KYC-2041", from_step=4, swaps={V3: V4})
+        self.assertNotEqual(other["run"]["id"], replay)
+        self.assertEqual(len(s.store.children("KYC-2041")), 2)
 
 
 if __name__ == "__main__":

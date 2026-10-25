@@ -8,6 +8,7 @@ UI needs (list runs, report, state at a step, resume, fork, replay, feedback).
 from __future__ import annotations
 
 import os
+import threading
 
 from .llm import AzureOpenAIClient
 from .provenance import REPORT_VERSION, Analyzer, fmt_day, state_diff
@@ -29,11 +30,18 @@ class Supersede:
         self.runner = Runner(self.store, self.kb, self.llm, kyc.workflow(), self.rules)
         self.analyzer = Analyzer(self.runner)
         self.samples = samples
+        # The API serves requests on several threads. Analysing a run can create its
+        # replay fork, so two requests for the same new run must not analyse it at
+        # the same time (that made duplicate replays). One lock around everything
+        # that analyses or starts runs keeps it simple; it is re-entrant because
+        # fork() and resume() call report().
+        self._lock = threading.RLock()
 
     # -- demo data -----------------------------------------------------
     def reset_demo(self) -> None:
-        self.store.clear()
-        self.seed_demo()
+        with self._lock:
+            self.store.clear()
+            self.seed_demo()
 
     def seed_demo(self) -> None:
         if self.store.list_runs():
@@ -49,11 +57,16 @@ class Supersede:
             inputs, subject, run_time = kyc.customer_inputs(c), c["name"], c["run_time"]
         else:
             subject = inputs["name"]
-        run_id = self.runner.start(subject=subject, inputs=inputs, run_time=run_time, options=options or {"breakpoints": True}, run_id=new_id("KYC"))
-        return self.report(run_id)
+        with self._lock:
+            run_id = self.runner.start(subject=subject, inputs=inputs, run_time=run_time, options=options or {"breakpoints": True}, run_id=new_id("KYC"))
+            return self.report(run_id)
 
     # -- reading -------------------------------------------------------
     def report(self, run_id: str, *, refresh: bool = False) -> dict:
+        with self._lock:
+            return self._report(run_id, refresh=refresh)
+
+    def _report(self, run_id: str, *, refresh: bool) -> dict:
         run = self.store.get_run(run_id)
         if not run:
             raise KeyError(run_id)
@@ -138,26 +151,29 @@ class Supersede:
 
     # -- acting --------------------------------------------------------
     def resume(self, run_id: str, action: str, *, swaps: dict | None = None, note: str = "") -> dict:
-        run = self.store.get_run(run_id)
-        if action == "edit" and not swaps:
-            bp = next((e for e in reversed(self.store.events(run_id)) if e["kind"] == "breakpoint"), None)
-            swaps = (bp or {}).get("detail", {}).get("suggested_swaps", {})
-        new_run = self.runner.resume(run_id, action, swaps=swaps, note=note)
-        return self.report(new_run, refresh=True)
+        with self._lock:
+            if action == "edit" and not swaps:
+                bp = next((e for e in reversed(self.store.events(run_id)) if e["kind"] == "breakpoint"), None)
+                swaps = (bp or {}).get("detail", {}).get("suggested_swaps", {})
+            new_run = self.runner.resume(run_id, action, swaps=swaps, note=note)
+            return self.report(new_run, refresh=True)
 
     def fork(self, run_id: str, *, from_step: int, swaps: dict | None = None, guard: bool | None = None, reason: str = "manual fork") -> dict:
+        """Fork a run. An identical existing fork (same step and options) is reused."""
         opts = {"breakpoints": False}
         if guard is not None:
             opts["guard"] = guard
-        new_run = self.runner.fork(run_id, from_step=from_step, swaps=swaps or {}, options=opts, reason=reason)
-        return self.report(new_run, refresh=True)
+        with self._lock:
+            new_run = self.runner.fork(run_id, from_step=from_step, swaps=swaps or {}, options=opts, reason=reason)
+            return self.report(new_run)
 
     def set_rule(self, run_id: str, key: str, on: bool) -> dict:
-        run = self.store.get_run(run_id)
-        opts = run["options"]
-        opts.setdefault("rules", {})[key] = on
-        self.store.update_run(run_id, options=opts)
-        return self.report(run_id)
+        with self._lock:
+            run = self.store.get_run(run_id)
+            opts = run["options"]
+            opts.setdefault("rules", {})[key] = on
+            self.store.update_run(run_id, options=opts)
+            return self.report(run_id)
 
     def add_feedback(self, run_id: str, verdict: str, note: str = "", author: str = "reviewer") -> dict:
         if verdict not in ("correct", "wrong", "needs_review"):

@@ -165,6 +165,13 @@ h1, h2, h3, h4 { margin: 0; }
   gap: clamp(20px, 1.2vw, 28px);
 }
 .center { min-width: 0; }
+/* The explanation panels change length when the view switches (run, replay, fork). Keeping them in
+   view and scrolling on their own leaves the page height to the centre column, so the page never jumps. */
+.rail-right {
+  position: sticky; top: 16px; overflow-y: auto; padding: 2px; margin: -2px; scrollbar-width: thin;
+  /* height 0 = adds nothing to the row height; then as tall as the row, at most the window */
+  height: 0; min-height: min(100%, calc(100vh - 32px));
+}
 .legend { display: flex; flex-direction: column; gap: 10px; padding: 4px; color: #3e4b4a; }
 .legend div { display: flex; align-items: center; gap: 10px; }
 .lg { width: 14px; height: 14px; border-radius: 50%; flex: none; }
@@ -176,7 +183,8 @@ h1, h2, h3, h4 { margin: 0; }
 .canvas { background: var(--canvas); color: var(--canvas-ink); border-radius: 16px; overflow: hidden; }
 .canvas-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 16px; padding: 22px 24px 6px; }
 .canvas-title { max-width: clamp(520px, 40vw, 820px); }
-.canvas-title h2 { font-size: clamp(27px, 1.5vw, 34px); line-height: 1.2; color: var(--canvas-bright); }
+/* room for two lines, so a shorter or longer headline (run vs replay) does not move the graph */
+.canvas-title h2 { font-size: clamp(27px, 1.5vw, 34px); line-height: 1.2; min-height: 2.4em; color: var(--canvas-bright); }
 .canvas-title p { margin: 8px 0 0; font-size: 13.5px; color: var(--canvas-muted); }
 .canvas-controls { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
 .seg { display: inline-flex; padding: 3px; border-radius: 10px; background: var(--canvas-2); border: 1px solid #24414a; }
@@ -237,10 +245,16 @@ g.is-hidden { opacity: 0.04; }
 .dot-note.good { color: var(--good); }
 .decision-label { width: 140px; text-align: center; font-size: 12.5px; font-weight: 600; color: var(--canvas-bright); }
 
-.pause-banner { margin: 4px 20px 16px; padding: 16px 18px; border-radius: 12px; background: var(--canvas-bright); color: var(--ink); display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 20px; align-items: center; }
-.pause-banner p { margin: 0; font-size: 13.5px; grid-column: 1; }
-.pause-banner .pause-title { grid-column: 1; }
-.pause-banner > .row { grid-column: 2; grid-row: 1 / span 2; }
+/* graph area; the pause card floats over it so the page never shifts when it comes and goes */
+.canvas-body { position: relative; }
+.pause-banner {
+  position: absolute; top: 8px; right: 20px; z-index: 2; width: min(420px, calc(100% - 40px));
+  padding: 16px; border-radius: 12px; background: var(--canvas-bright); color: var(--ink);
+  box-shadow: 0 16px 40px -12px rgba(0, 0, 0, 0.6); animation: card-in .25s ease;
+}
+.pause-banner p { margin: 8px 0 12px; font-size: 13.5px; line-height: 1.5; }
+.pause-banner .btn { min-height: 40px; padding: 0 14px; font-size: 13px; }
+@keyframes card-in { from { opacity: 0; transform: translateY(-6px); } }
 .pause-title { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; color: var(--bad-ink); }
 .pause-title svg { fill: var(--bad-ink); }
 
@@ -309,16 +323,15 @@ g.is-hidden { opacity: 0.04; }
 @media (max-width: 1180px) {
   .decision { grid-template-columns: minmax(0, 1fr); }
   .rail, .rail-right { order: 2; }
+  .rail-right { position: static; height: auto; min-height: 0; overflow: visible; }
 }
 @media (max-width: 720px) {
   .page { padding: 16px; }
   .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .attention h1 { font-size: 27px; }
   .steps { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .pause-banner { grid-template-columns: minmax(0, 1fr); }
-  .pause-banner > .row { grid-column: 1; grid-row: auto; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .edge-flow { animation: none; }
+  .edge-flow, .pause-banner, .edges g { animation: none; }
   .edge, .node, .node-wrap, .stack-bar span, .step-bar { transition: none; }
 }

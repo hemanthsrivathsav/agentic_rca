@@ -175,9 +175,10 @@ Build order steps 1 to 6 and 8 are done; step 7 (Azure client) is written but un
 
 - **Engine** (`backend/supersede/`, standard library only): `store.py`, `knowledge.py`, `llm.py` (MockLLMClient + AzureOpenAIClient over urllib), `tracing.py`, `runtime.py` (StepContext, Runner.start/resume/fork/rerun_step), `rules.py` (stale_evidence, tool_loop, ungrounded_before_action, budget), `provenance.py` (Analyzer), `service.py` (facade used by both APIs), `demo/kyc.py` + `demo/data/*.json`.
 - **APIs**: `backend/api/app.py` (FastAPI) and `backend/api/stdlib_server.py` (same routes, no dependencies). Routes are listed in `backend/README.md`.
-- **Tests**: `backend/tests/test_engine.py`, 19 tests, all passing (`python -m unittest discover -s tests`).
-- **Frontend** (`frontend/src/`): Overview and Decision pages per design v2. Verified in a headless browser against the stdlib server: graph, Play with simulated breakpoint, replay toggle, state drawer, live pause → swap → second pause → approve. No console errors.
-- Not verified in this environment: the FastAPI app itself (FastAPI could not be installed here) and `npm install` / `tsc` with the real React types. Run both on the laptop first.
+- **Tests**: `backend/tests/test_engine.py`, 22 tests, all passing (`python -m unittest discover -s tests`).
+- **Frontend** (`frontend/src/`): Overview and Decision pages per design v2. Runs on the laptop against the FastAPI app (`python -m uvicorn`), `npm run typecheck` passes. Checked in headless Edge at 2560 and 1440 px wide: graph layout, Play with simulated breakpoint, fork animating in place, branches.
+- **Rebuild spec**: `docs/REBUILD_SPEC.md` describes every file in enough detail to recreate the project, with expected demo results. Keep it in sync when behaviour changes.
+- Dev machine: Smart App Control blocks unsigned `.exe` launchers, so always run `python -m pip`, `python -m uvicorn`, `python -m unittest`. Install packages into the main Python, not a venv.
 
 Design decisions made while building:
 - Attribution = leave-one-out on each claim's inputs; if no single input changes the claim, inputs are removed in pairs and the credit split (handles redundant causes, e.g. in the replay both claim 03 and claim 04 lead to escalation).
@@ -185,5 +186,8 @@ Design decisions made while building:
 - Findings: healthy, unsourced, retired_in_context, claim_used_replaced, decision_used_replaced, outcome_unchanged, confirmed_by_replay.
 - Replay is automatic: when a run used a retired chunk, the analyzer forks it from the earliest step that chunk entered, with every retired chunk swapped for its current version (fork reason "replay with current versions"), and diffs claims and decision.
 - Demo runs: KYC-2041 Meridian Ledger (historical, no breakpoints, approve → replay escalate, 106 days out of date), KYC-2036 Tidewater Coin Exchange (breakpoints on, paused at step 3), KYC-2040/2039/2033 (read v3, outcome unchanged). The mock decision step gives 6 approve / 4 escalate across 10 samples for low-risk cases because claim 05 has no source.
+- Graph layout follows design v2 and depends only on structure (claims step down in run order, evidence level with the claim it feeds, versions of one source grouped, decision centred). A fork's graph keeps the version it swapped out (status `swapped_out`), so a run and its forks have the same nodes and the Decision page animates between them in place instead of reloading.
+- Forking reuses an identical fork (same step, same options): with the mock model a copy would be exactly the same run. The service lock stops simultaneous requests from creating duplicate replays.
+- The Branches row under the canvas is not in design v2; it came from the "fork branches" feature above and still needs a v2 design.
 
 Next ideas: "save as test case" + regression runner, Breakpoints inbox page, Replay and Audit packet pages in v2 style, text-to-SQL data-agent demo (data evidence type).

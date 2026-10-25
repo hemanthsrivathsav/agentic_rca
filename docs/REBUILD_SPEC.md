@@ -31,7 +31,7 @@ The demo uses a synthetic KYC onboarding workflow at the fictional **Harborline 
 - **Backend engine (`backend/supersede/`): Python standard library only.** It uses `sqlite3`, `json`, `re`, `math`, `difflib`, `uuid`, `dataclasses`, `urllib`, `threading`, `contextlib`, `copy`, `time`, `datetime`, `pathlib`, `collections`, `typing` and `os`. Python 3.10 or newer, with `from __future__ import annotations` in every module.
 - **HTTP API:** FastAPI + uvicorn (`backend/api/app.py`), plus a fallback server written on the standard library only (`backend/api/stdlib_server.py`) that serves the same routes.
 - **No LangChain, LangGraph or LangSmith.** The runtime, checkpoints, breakpoints and forks are all hand-written.
-- **Frontend:** React 18 + TypeScript + Vite, styled with plain CSS in a single file. No router, UI, charting, graph or CSS libraries. The graph is absolutely positioned HTML nodes with SVG edges.
+- **Frontend:** React 18 + TypeScript + Vite 8 (Node.js 20.19+ or 22.12+), styled with plain CSS in a single file. No router, UI, charting, graph or CSS libraries. The graph is absolutely positioned HTML nodes with SVG edges.
 - **Tests:** `unittest` (standard library only).
 - **Dev machine:** Windows. Smart App Control blocks unsigned `.exe` launchers, so run tools as `python -m pip`, `python -m uvicorn` and `python -m unittest`. Install into the main Python, not a virtual environment.
 - **Encoding:** every file is UTF-8. Labels use the `§` character.
@@ -415,6 +415,7 @@ Constructor: `Runner(store, kb, llm, workflow, rules=None)`.
 
 1. Raises `ValueError("from_step out of range")` unless `1 <= from_step <= size`.
 2. Child options: deep-copy the parent's options, remove `ack`, set `swaps` to the parent's swaps merged with the new `swaps`, then `update(options)`.
+   - **Reuse identical forks.** If the parent already has a child with the same `forked_at` and exactly these options, and no `run_new_id` was given, return that child's id and stop. With the mock model an identical fork would produce exactly the same run. This also makes a "Fork with the current version" click return the automatic replay.
 3. Create the child run with the same workflow, subject and run_time, `parent_run_id=run_id`, `forked_at=from_step`, `fork_reason=reason` and `created_at=now_iso()`.
 4. Copy the parent's checkpoints with `step < from_step` (checkpoint 0 included).
 5. Copy the parent's spans with `step < from_step`, each with a new id, the child's `run_id` and `cached=1`.
@@ -730,6 +731,7 @@ Raises `KeyError` if the run is unknown. It works on `last = _last_step(run)`, `
 - `kb = kyc.knowledge()`.
 - The model mode is `llm`, else env `SUPERSEDE_LLM`, else `"mock"`, lowercased. `"azure"` uses `AzureOpenAIClient()`; anything else uses `kyc.mock_llm()`. The mode is kept in `llm_mode`.
 - It also sets `rules = default_rules()`, `runner = Runner(store, kb, llm, kyc.workflow(), rules)` and `analyzer = Analyzer(runner)`.
+- **`_lock = threading.RLock()`.** The API serves requests on several threads. `report`, `start_run`, `resume`, `fork`, `set_rule` and `reset_demo` all run under this lock. Without it, two requests for a not-yet-analysed run could each create a replay fork. The lock is re-entrant because `fork` and `resume` call `report`. `report` takes the lock and calls `_report`, which holds the logic described below.
 
 **Methods**
 
@@ -775,7 +777,7 @@ Raises `KeyError` if the run is unknown. It works on `last = _last_step(run)`, `
 
 - **`state(run_id, step)`:** raises `KeyError(f"no checkpoint for step {step}")` if there is no checkpoint. Otherwise returns `{run_id, step, state: after, diff: state_diff(before or None, after), spans: [that step's spans]}`.
 - **`resume(run_id, action, *, swaps=None, note="")`:** if the action is `edit` and no swaps were given, it uses `suggested_swaps` from the latest `breakpoint` event. It then calls `runner.resume` and returns `report(new_id, refresh=True)`.
-- **`fork(run_id, *, from_step, swaps=None, guard=None, reason="manual fork")`:** options are `{"breakpoints": False}`, plus `"guard": guard` when guard is not None. It calls `runner.fork` and returns `report(new, refresh=True)`.
+- **`fork(run_id, *, from_step, swaps=None, guard=None, reason="manual fork")`:** options are `{"breakpoints": False}`, plus `"guard": guard` when guard is not None. It calls `runner.fork`, which may return an existing identical fork, and returns `report(new)`.
 - **`set_rule(run_id, key, on)`:** sets `options.rules[key] = on`, updates the run and returns `report(run_id)`.
 - **`add_feedback(run_id, verdict, note="", author="reviewer")`:** raises `ValueError("verdict must be correct, wrong or needs_review")` for any other verdict. Otherwise it stores `{id: new_id("fb"), run_id, verdict, note, author, at}` and returns `{run_id, feedback: [...]}`.
 
@@ -792,7 +794,7 @@ The package docstring lists the layers `store`, `knowledge`, `llm`, `tracing`, `
 - `backend/README.md` holds a short run book and the API table in section 8. Its run book should use `python -m uvicorn api.app:app --reload`.
 - The root `README.md` holds run steps, the 3-minute demo script, a "How it works" table (one row per module) and Azure env-var setup.
 
-### 7.14 `tests/test_engine.py` (20 tests, `unittest`)
+### 7.14 `tests/test_engine.py` (22 tests, `unittest`)
 
 The test module starts with:
 - `V3, V4 = "edd-policy@v3#2.1", "edd-policy@v4#2.1"`;
@@ -849,6 +851,8 @@ The test module starts with:
   - `ranked[0].id == "KYC-2041"`;
   - `replaced[0].new == "EDD Policy v4 §2.1"`.
 - `test_feedback`: verdict `wrong` is saved, and verdict `"maybe"` raises `ValueError`.
+- `test_concurrent_reports_make_one_replay`: 4 threads call `report("KYC-2041")` at once on a fresh service, and KYC-2041 ends with exactly 1 child.
+- `test_identical_fork_is_reused`: forking KYC-2041 from step 3 with `{V3: V4}` twice returns the replay run both times. A fork from step 4 is a new run, which leaves 2 children.
 
 Run with `python -m unittest discover -s tests -v` from `backend/`.
 
@@ -982,34 +986,50 @@ interface StepState { run_id; step; state: { evidence; claims; messages: {from; 
 
 This follows design v2. Evidence is on the left, there is one column per agent, and the outcome is on the right. Claims step down in run order, each piece of evidence sits level with the claim it feeds, and the decision sits in the vertical middle. **Positions depend only on the graph's structure, never on statuses**, so a run, its replay and its forks share one layout and animate between each other.
 
+The layout and router must stay readable for any number of agents, steps, claims per step and inputs, including agents that work again later in the run. The key property is that **every claim has a row of its own**, so a horizontal line along a claim's row can never hit another box. Edges run along rows and turn only in the empty lanes between columns.
+
 **Constants:**
 
-| Name | Value |
-|---|---|
-| `TOP` | 56 |
-| `FIRST_ROW` | 44 |
-| `CLAIM_ROW` | 86 |
-| `EVIDENCE_X` | 60 |
-| `FIRST_AGENT_X` | 340 |
-| `AGENT_W` | 184 |
-| `PILL_W` | 160 |
-| `PILL_H` | 66 |
-| `EV_GAP` | 60 |
-| `FAMILY_GAP` | 72 |
-| `LABEL_ROOM` | 48 |
+| Name | Value | Meaning |
+|---|---|---|
+| `TOP` | 56 | below the column heads |
+| `FIRST_ROW` | 44 | centre of the first claim, below `TOP` |
+| `CLAIM_ROW` | 86 | row pitch |
+| `EVIDENCE_X` | 60 | evidence dot centre |
+| `EV_LABEL_W` | 196 | `.dot-label` width |
+| `EV_MAX_R` | 22 | largest evidence dot radius |
+| `FIRST_AGENT_X` | 350 | left edge of the first agent column |
+| `AGENT_W` | 210 | column pitch: a pill plus a 50 px lane |
+| `PILL_W`, `PILL_H` | 160, 66 | claim box |
+| `DECISION_R` | 32 | smallest outcome radius |
+| `MAX_DECISION_R` | 64 | largest outcome radius |
+| `DECISION_LABEL_W` | 140 | `.decision-label` width; lanes stop before it |
+| `EV_GAP` | 60 | least distance between evidence dots |
+| `FAMILY_GAP` | 72 | between versions of one source |
+| `LABEL_ROOM` | 48 | under the lowest node |
+| `PORT_GAP` | 12 | between edges on one side of a box |
+| `LANE_PAD` | 8 | turns keep this far from boxes |
+| `MIN_SLOT` | 8 | least spacing of turns in one lane; lanes widen to fit |
+| `STRAIGHT_DY` | 20 | ends closer than this are joined straight |
+| `MAX_CORNER` | 28 | corner radius cap |
 
-**`radius(n)`:** 32 for the decision node, otherwise `round(8 + min(1, weight) * 14)`.
+**`radius(n)`:** 32 for the decision node, otherwise `round(8 + min(1, weight) * 14)`. In the layout the outcome uses `decisionR` instead (below).
 
-**`naturalWidth(columnCount)`** (exported) returns `FIRST_AGENT_X + (columnCount - 2) * AGENT_W + 40 + 120`. That is the graph's width before any spreading: 1052 for 5 columns.
+**`laneOf(a, b, last)`** gives the lane an edge turns in. Lane *j* is the gap on the left of column *j*.
+- Forward from evidence: lane 1, so the edge turns right after the evidence column and then runs along the target's row.
+- Forward from a claim: lane `b.column`, so it runs along the source's row and turns just before the target.
+- Backward (`a.column > b.column`): lane `b.column + 1`, the gap on the right of the target column.
+- Same column: lane `a.column + 1`, capped at `last`.
 
-**`layoutGraph(columns, nodes, edges, extra = 0)`** returns `{width, height, columns: [{name, x}], nodes: Placed[], byId}`.
+**`layoutGraph(columns, nodes, edges, extra = 0)`** returns `{width, height, columns: [{name, x}], nodes: Placed[], byId, lanes: [{from, to}]}`. Call it with `extra = 0` to get the natural width.
 
-1. **Column x.** On big screens `extra` widens the graph: `gap = extra / (cols - 1)`, and column *i* moves right by `gap * i`. Before that shift:
-   - column 0 is at `EVIDENCE_X`;
-   - the last column is at `FIRST_AGENT_X + (cols - 2) * AGENT_W + 40`;
-   - column *i* is at `FIRST_AGENT_X + (i - 1) * AGENT_W + PILL_W / 2`.
-2. **Claims.** Sort the claims by `(step, id)`. Claim *i* gets `y = TOP + FIRST_ROW + i * CLAIM_ROW`.
-3. **Decision.** `y` is the midpoint of the highest and lowest claim y.
+1. **Outcome size.** `inputs` is the largest number of non-`replaces` edges into one decision node. `decisionR = min(MAX_DECISION_R, max(DECISION_R, (inputs - 1) * PORT_GAP / 2 + 10))`, so every input gets its own port. `reach = max(decisionR, DECISION_LABEL_W / 2)`: the outcome column reaches this far left.
+2. **Column x.**
+   - Base positions: column 0 at `EVIDENCE_X`; agent column *i* at `FIRST_AGENT_X + PILL_W/2 + (i-1) * AGENT_W`; the outcome at `FIRST_AGENT_X + agents * AGENT_W + reach`.
+   - Lane widening: `demand[j]` counts the edges whose `laneOf` is *j*. Walking the columns left to right, column *i* shifts right by the running total of `max(0, demand[i] * MIN_SLOT + 2 * LANE_PAD - baseLaneWidth[i]) + gap`, where `gap = extra / (cols - 1)` is the big-screen spread.
+   - Lane *j* is the range `[rightEdge(j-1) + LANE_PAD, leftEdge(j) - LANE_PAD]`. For column 0 the right edge is `EVIDENCE_X + EV_MAX_R + 8 + EV_LABEL_W`; for agents it is `x + PILL_W/2`. The left edge is `x - PILL_W/2` for agents and `x - reach` for the outcome.
+3. **Claims.** Sort the claims by `(step, id)`. Claim *i* gets `y = TOP + FIRST_ROW + i * CLAIM_ROW`.
+4. **Outcomes.** Sorted by `(step, id)`. Outcome *k* of *n* gets `y = middle + (k - (n-1)/2) * CLAIM_ROW`, where `middle` is the midpoint of the highest and lowest claim y.
 4. **Evidence.**
    - **Target.** An evidence node's target is the y of the claim it feeds. Among its non-`replaces` edges, pick drove before context, then the highest share, then the highest target.
    - **Families.** Nodes joined by `replaces` edges form a family. A family is placed as one block: members sorted by version (`@v(\d+)#` in the id), and its target is the lowest target among its members.
@@ -1017,16 +1037,20 @@ This follows design v2. Evidence is on the left, there is one column per agent, 
      - the first member goes at `max(target, cursor)`;
      - each further member goes `FAMILY_GAP` lower;
      - then `cursor = last y + EV_GAP`.
-5. **Shapes.** Claims are `pill`s (`PILL_W × PILL_H`). Everything else is a `circle` of side `2r`. `x` is the column x, which is the node's centre.
-6. **Size.** `width = lastColumnX + 120` and `height = lowest node bottom + LABEL_ROOM`.
+6. **Shapes.** Claims are `pill`s (`PILL_W × PILL_H`). The outcome is a circle of radius `decisionR`. Evidence nodes are circles of radius `radius(n)`. `x` is the column x, which is the node's centre.
+7. **Size.** `width = outcomeX + reach + 24` and `height = lowest node bottom + LABEL_ROOM`.
 
-**`edgePath(e, a, b)`** returns an SVG path for an edge. Edges leave from the right side of a node and enter on the left:
-- **`replaces` edge:** a straight line from the bottom of the upper dot to the top of the lower dot.
-- **Same column:** runs from the bottom of `a` to the top of `b`, with 20 px control offsets.
-- **Into the decision from just below it:** this applies when `a.y > b.y + b.h` and the horizontal gap is under 80. With `sx = a.x + a.w/2`, the path is `M sx a.y C b.x a.y, b.x a.y, b.x bottom(b)`, so the edge enters the decision from underneath.
-- **Otherwise:**
-  - `sx = a.x + a.w/2`, `tx = b.x - b.w/2` and `dx = max(40, (tx - sx) / 2)`.
-  - The path is `M sx a.y C sx+dx a.y, tx-dx b.y, tx b.y`.
+**`routeEdges(layout, edges)`** returns `{"{from}-{to}": {d, pts}}`: an SVG path and the polyline it was built from. Pass only the edges on screen, so hidden ones don't take up ports or lane slots.
+
+1. **`replaces` edges:** a straight line from the bottom of the upper dot to the top of the lower dot.
+2. **Plan each other edge.**
+   - **Forward:** leaves from the right side of a claim, or from the right edge of an evidence dot with no port. It enters the target's left side.
+   - **Backward:** leaves the source's left side and enters the target's right side.
+   - **Same column:** if no other node in that column lies between the two, it is a straight vertical line from the bottom of the upper node to the top of the lower one ("straight-down"). Otherwise it goes "around": out of the right side of `a`, through the lane on the right of the column, and into the right side of `b`.
+3. **Ports.** For each side of each node, sort its edges by the y of their other end (then x) and spread them `sp = min(PORT_GAP, (h - 2 * inset) / (n - 1))` apart around the centre. The inset is 12 for pills and 8 for circles. On a circle the port x lies on the circle at that height.
+4. **Lane slots.** An edge turns only if its ends differ by `STRAIGHT_DY` or more ("around" edges always turn). Each turning edge gets its own x in its lane: the lane's width is split evenly between them.
+   - Ordering keeps turns nested instead of crossing: for claim → later column, slots are ordered by `|dy|` ascending, so the longest drop turns nearest the target; for evidence, backward and around edges, by `-|dy|`.
+5. **Points.** A straight edge is `[[sx, sy], [tx, ty]]`. A turning edge is `[[sx, sy], [x, sy], [x, ty], [tx, ty]]`. The path rounds each corner with radius `min(MAX_CORNER, half of each adjacent segment)`, so short drops become a smooth S.
 
 ### 9.4 `components/Header.tsx`
 
@@ -1040,17 +1064,17 @@ This follows design v2. Evidence is on the left, there is one column per agent, 
 Props: `{report, tone: "run"|"now", visibleStep, selected, onSelect, filters: GraphFilters, children?}`. `GraphFilters` is exported as `{documents, tools, context}`.
 
 - **Node filtering.** Non-evidence nodes always show. Tool evidence shows if `filters.tools` is on; other evidence shows if `filters.documents` is on.
-- **Fit to width.** Constants: `WRAP_PADDING = 24`, `MAX_SPREAD = 1.35`, `MAX_SCALE = 1.35`. A `ResizeObserver` on the wrapper stores `avail = clientWidth - WRAP_PADDING`. With `natural = naturalWidth(columns.length)`:
+- **Fit to width.** Constants: `WRAP_PADDING = 24`, `MAX_SPREAD = 1.35`, `MAX_SCALE = 1.35`. A `ResizeObserver` on the wrapper stores `avail = clientWidth - WRAP_PADDING`. The natural width depends on the graph, because lanes widen and the outcome grows, so `base = layoutGraph(columns, shownNodes, edges, 0)` and `natural = base.width`:
   - **Narrow** (`avail <= natural`): `scale = max(0.7, avail / natural)` and `extra = 0`. Below 0.7 the wrapper scrolls.
   - **Wide**: first spread the columns, with `spread = min(avail, natural * MAX_SPREAD)` and `extra = spread - natural`. Then scale up with `scale = min(MAX_SCALE, avail / spread)`.
   - Before the first measurement (`avail` is 0), `scale = 1`.
-  - The layout is `useMemo(layoutGraph(columns, shownNodes, edges, extra))`.
+  - The layout is `extra > 0 ? layoutGraph(columns, shownNodes, edges, extra) : base`.
+  - `shownEdges` is the edges whose ends are both laid out, minus context edges when `filters.context` is off. Then `routes = routeEdges(layout, shownEdges)`.
   - The DOM is `div.graph-wrap > div.graph-sizer(width × scale, height × scale) > div.graph-stage(width, height, transform: scale())`.
 - **Visibility.** `visible(id)` means the node's step is no higher than `visibleStep` (unknown ids count as step 99).
 - **Path colour.** `healthy = tone === "now" || counts.replaced === 0`. `flowTone(status)` is `bad` for replaced, `good` when healthy, else `neutral`.
 - **Column headers.** `div.col-head`, centred on the column x. The half-width is `x` for column 0 and 80 for the others. There are no step row rules.
-- **Edges.** One `svg.edges` holds every edge as `<g key="{from}-{to}" className={visible ? "" : "is-hidden"}>`.
-  - Context edges are skipped when `filters.context` is off.
+- **Edges.** One `svg.edges` holds every edge in `shownEdges` as `<g key="{from}-{to}" className={visible ? "" : "is-hidden"}>`, drawn with `routes[key].d`.
   - The path class is:
     - `edge edge-replaces` for `replaces` edges. These also get an SVG `<text class="edge-label" text-anchor="end">replaces</text>`, 10 px left of the line at its midpoint;
     - `edge edge-nosource` for `context` edges whose source has status `nosource` (amber dashed);
@@ -1262,8 +1286,8 @@ The page stays mounted when `runId` changes (see `App.tsx`). It never shows "Loa
      - Controls:
        - when a replay exists, a `div.seg` with "As the agents ran it" and "With current versions". Switching modes stops play and resets `visibleStep` to the last step (switching to `now` also clears `simPause`);
        - `div.seg.seg-small` with Graph and Table. Segment buttons use `aria-pressed`.
-     - The body is `EvidenceGraph` or `ClaimsTable`.
-     - **Pause banner** (`div.pause-banner`, role alert), shown when `simPause` or `realPause`:
+     - `div.canvas-body` (position relative) holds `EvidenceGraph` or `ClaimsTable`, and the pause banner.
+     - **Pause banner** (`div.pause-banner`, role alert), shown when `simPause` or `realPause`. It floats over the top right of the graph, as in design v2, so showing or hiding it never moves the page:
        - Title, with a pause icon: `Run paused at step N`, or `With breakpoints on, this run would pause at step N`.
        - Message: the event message, or `The {agent} retrieved a replaced source. Nothing would have been decided yet.`
        - Buttons for a real pause:
@@ -1271,10 +1295,9 @@ The page stays mounted when `runId` changes (see `App.tsx`). It never shows "Loa
          - `btn-light-line` "Approve and continue". Calls `resume(approve)`.
          - `btn-light-line` "Reject". Calls `resume(reject)`.
        - Buttons for a simulated pause:
-         - `btn-dark` "Fork with the current version". Calls `api.fork(run.id, simStep, report.replay.swaps, "forked at breakpoint")`.
+         - `btn-dark` `"Fork with {shortVersion of each replay swap} and continue"`, for example "Fork with v4 §2.1 and continue". It calls `forkAndContinue()`, which works like design v2 and makes no request and no navigation. The automatic replay is exactly this fork (same step, same swap) and is already loaded, so it clears `simPause`, sets `mode = "now"` and calls `startPlay(replay.last_step, simStep, null, true)`. The evidence re-points from v3 to v4 on the same layout, the toggle moves to "With current versions", and steps 4 to 6 play on. If the replay is somehow not loaded, it falls back to `api.fork(run.id, simStep, report.replay.swaps, "forked at breakpoint")` followed by `openRun(result, simStep)`.
          - `btn-light-line` "Continue as it ran". Clears `simPause` and calls `play()`.
-       - Every action finishes with `openRun`, which shows the result in place, with no page reload:
-         - "Fork with the current version" plays the fork on from `simStep`, so the flow re-routes through v4 at step 3 and steps 4 to 6 follow;
+       - The real-pause actions finish with `openRun`, which shows the result in place, with no page reload:
          - "Swap in the current version" and "Approve and continue" play on from the run's `paused_at`;
          - "Reject" just shows the result.
      - **`div.scrubber`**
@@ -1300,7 +1323,7 @@ The page stays mounted when `runId` changes (see `App.tsx`). It never shows "Loa
      - "Built on replaced evidence": `tone-bad` if above 0, else `tone-ok`;
      - "Without a source": `tone-warn` if above 0;
      - "Retrieved but unused": "{unused} of {evidence}".
-3. **Right `aside.rail-right`**
+3. **Right `aside.rail-right`**. It is sticky and scrolls on its own (see section 10). Its panels change length between run, replay and fork, so the page height comes from the centre column alone and the page never jumps.
    - `AnalystRead`, using the main report when paused, else `shown`.
    - `NodeDetail`, with `selected` only if that id exists in `shown`.
    - `StabilityCard`.
@@ -1380,7 +1403,8 @@ There is one plain CSS file. The header comment reads: "Light, calm shell; a dar
     - `.lg-bad`: bad-bg fill, bad-ink border;
     - `.lg-warn`: dashed `#b07c00` border;
     - `.lg-size`: line colour.
-  - `.canvas`: canvas background, radius 16px. `.canvas-head` has 22px 24px 6px padding. `.canvas-title` has max-width `clamp(520px, 40vw, 820px)`, and its `h2` is `clamp(27px, 1.5vw, 34px)` in canvas-bright. Its `p` is 13.5px canvas-muted.
+  - `.canvas`: canvas background, radius 16px. `.canvas-head` has 22px 24px 6px padding. `.canvas-title` has max-width `clamp(520px, 40vw, 820px)`, and its `h2` is `clamp(27px, 1.5vw, 34px)` in canvas-bright, with `min-height: 2.4em` (two lines), so a shorter or longer headline never moves the graph. Its `p` is 13.5px canvas-muted.
+  - `.rail-right`: `position: sticky; top: 16px; max-height: calc(100vh - 32px); overflow-y: auto; padding: 2px; margin: -2px; scrollbar-width: thin`. Under 1180px it becomes static with no max-height.
   - `.seg`: canvas-2 background with a `#24414a` border. Buttons are 38px, `#b9cacc`. Pressed buttons are canvas-bright with canvas-coloured text. `.seg-small` buttons are 32px.
   - `.canvas-foot`: 13px canvas-muted.
 - **Graph:**
@@ -1407,7 +1431,11 @@ There is one plain CSS file. The header comment reads: "Light, calm shell; a dar
     - `.n-not_retrieved`: dashed `#5e7a80` border, transparent;
     - `.n-swapped_out`: `#3a5359` border, `rgba(255,255,255,.03)` fill, and its label at opacity .6 (`.node-wrap:has(.n-swapped_out) .dot-label`).
   - `.dot-label`: 196px wide, 11.5px, `#b9cacc`, with `.dot-title`, `.dot-note`, `.bad` and `.good` variants. `.decision-label` is 140px, centred, 12.5px/600.
-  - `.pause-banner`: margin 4px 20px 16px, canvas-bright background, a grid `1fr auto` with the buttons in column 2 spanning 2 rows (stacked under 720px). `.pause-title` is 13px/700 bad-ink with an SVG fill.
+  - `.canvas-body`: `position: relative`.
+  - `.pause-banner`: absolute, `top: 8px; right: 20px; z-index: 2; width: min(420px, 100% - 40px)`, 16px padding, radius 12px, canvas-bright background, shadow `0 16px 40px -12px rgba(0,0,0,.6)`. It fades in (`card-in`, .25s, from opacity 0 and 6px up).
+    - Its `p` has margin `8px 0 12px` at 13.5px. Its `.btn`s are 40px tall, 0 14px padding and 13px, so both fit on one row.
+    - `.pause-title` is 13px/700 bad-ink with an SVG fill.
+    - Under `prefers-reduced-motion`, `.pause-banner` and `.edges g` do not animate.
 - **Scrubber:**
   - `.scrubber`: flex, top border in canvas-line.
   - `.play`: a 44px round canvas-bright button.
@@ -1503,7 +1531,7 @@ Use these to check a rebuild beyond the unit tests. Durations and token counts c
 2. **Model and tracing:** `llm.py` and `tracing.py`.
 3. **Runtime:** `runtime.py`. Then `demo/kyc.py`, with the workflow and the mock script.
 4. **Rules:** `rules.py`. Check: the `BreakpointTests` that only use the runner (tool loop, budget).
-5. **Analysis:** `provenance.py`, then `service.py`. Check: all 20 tests pass, and the section 12 values match.
+5. **Analysis:** `provenance.py`, then `service.py`. Check: all 22 tests pass, and the section 12 values match.
 6. **APIs:** `api/app.py` and `api/stdlib_server.py`. Check: `GET /api/overview` matches section 12.
 7. **Frontend foundations:** config files, `types.ts`, `api.ts`, `format.ts`, `router.ts`, `layout.ts` and `styles.css`.
 8. **Frontend screens:** `Header`, `EvidenceGraph`, `Panels`, `StateDrawer`, `Overview`, `Decision`, `App` and `main`. Check: `npm run typecheck` passes. Then walk through the README's demo script against the running backend:
@@ -1544,4 +1572,4 @@ Keep these unless you also change the dependent code and tests.
 9. **Silent tracers still count model calls.** They count calls but store nothing, so leave-one-out and sampling never write spans.
 10. **The Header link is hard-coded.** "Decision graph" always points at `#/runs/KYC-2041`.
 11. **`api.fork` never sends `guard`.** The frontend doesn't use guard mode; it is only reachable through the API and the tests.
-12. **Duplicate replay forks (known bug).** Two report requests that arrive together for a run that has not been analysed yet can each create a replay fork. Causes include React StrictMode running `load()` twice in dev, or two open tabs. The run then shows two "Fork from step 3" branches. Fixing it needs a lock around the analysis in `Supersede.report` or `Analyzer._replay`.
+12. **No duplicate forks.** React StrictMode runs `load()` twice in dev, and two tabs can ask for the same report at once. The service lock and fork reuse together keep a run at one replay and one fork per distinct (step, options).
