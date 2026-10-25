@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Supersede · Run KYC-2041 trace</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;family=IBM+Plex+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#F6F6F3;font-family:'IBM Plex Sans',system-ui,sans-serif;color:#15171C}
+a{color:#2647B8}a:hover{color:#1A3489}
+</style>
+</helmet>
+<div style="display: flex; flex-wrap: wrap; min-height: 1080px; background: #F6F6F3; font-family: 'IBM Plex Sans', system-ui, sans-serif; color: #15171C">
+
+<nav aria-label="Main" style="flex: 1 1 220px; max-width: 100%; background: #101826; color: #E7EAF0; padding: 24px 16px; box-sizing: border-box; display: flex; flex-direction: column; gap: 32px">
+<div style="display: flex; align-items: center; gap: 10px; padding: 0 8px">
+<svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true"><rect x="1" y="1" width="26" height="26" rx="7" stroke="#8FA8FF" stroke-width="2"></rect><path d="M8 18l5-8 3 5 4-6" stroke="#E7EAF0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+<div style="font-size: 18px; font-weight: 700; letter-spacing: -0.01em">Supersede</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 4px">
+<a href="Main.dc.html" style="display: block; padding: 12px; border-radius: 8px; color: #C9D0DC; text-decoration: none; font-size: 14px">Agent runs</a>
+<a href="Graph.dc.html" style="display: block; padding: 12px; border-radius: 8px; background: #1E2A40; color: #FFFFFF; text-decoration: none; font-weight: 600; font-size: 14px">Traces</a>
+<a href="Replay.dc.html" style="display: block; padding: 12px; border-radius: 8px; color: #C9D0DC; text-decoration: none; font-size: 14px">Replays</a>
+<a href="Audit.dc.html" style="display: block; padding: 12px; border-radius: 8px; color: #C9D0DC; text-decoration: none; font-size: 14px">Audit packets</a>
+<a href="Main.dc.html" style="display: block; padding: 12px; border-radius: 8px; color: #C9D0DC; text-decoration: none; font-size: 14px">Knowledge versions</a>
+</div>
+<div style="margin-top: auto; padding: 12px; border-radius: 8px; border: 1px solid #2B3850; font-size: 12px; line-height: 1.5; color: #9AA3B5">
+<div style="font-weight: 600; color: #E7EAF0">Harborline Bank</div>
+<div>Fictional bank · synthetic data</div>
+</div>
+</nav>
+
+<main style="flex: 999 1 560px; min-width: 0; padding: 32px 40px 48px; box-sizing: border-box; display: flex; flex-direction: column; gap: 24px">
+<div style="font-size: 13px; color: #5A5F6B"><a href="Main.dc.html">Agent runs</a> / <a href="Answer.dc.html">KYC-2041</a> / Trace</div>
+<header style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px">
+<div>
+<h1 style="margin: 0; font-size: 28px; font-weight: 600; letter-spacing: -0.01em">How the approval was derived</h1>
+<div style="margin-top: 6px; font-size: 14px; color: #5A5F6B">Showing the path for one claim: "Digital asset custody is not on the EDD escalation list."</div>
+</div>
+<a href="Replay.dc.html" style="display: inline-flex; align-items: center; height: 44px; padding: 0 16px; border-radius: 8px; background: #2647B8; font-size: 14px; font-weight: 600; color: #FFFFFF; text-decoration: none">Replay with current truth</a>
+</header>
+
+<section aria-label="Derivation path" style="background: #FFFFFF; border: 1px solid #E3E4E8; border-radius: 12px; padding: 24px; display: flex; flex-direction: column; gap: 20px">
+<h2 style="margin: 0; font-size: 16px; font-weight: 600">Derivation path</h2>
+<div style="overflow-x: auto">
+<div style="display: flex; align-items: flex-start; gap: 0; min-width: 1040px">
+
+<div style="flex: 1 1 0; min-width: 0; padding: 14px; border-radius: 10px; border: 1px solid #D5D7DD; display: flex; flex-direction: column; gap: 4px">
+<div style="font-size: 11px; font-weight: 600; color: #5A5F6B; text-transform: uppercase; letter-spacing: 0.05em">Step 3 · Risk agent</div>
+<div style="font-size: 14px; font-weight: 600">Retrieve EDD policy</div>
+<div style="font-size: 12px; color: #5A5F6B">6 chunks returned</div>
+</div>
+<div aria-hidden="true" style="flex: none; width: 32px; padding-top: 30px"><svg width="32" height="12" viewBox="0 0 32 12" fill="none"><path d="M2 6h26" stroke="#8A8F9A" stroke-width="1.5"></path><path d="M24 2l4 4-4 4" stroke="#8A8F9A" stroke-width="1.5" fill="none"></path></svg></div>
+
+<div style="flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; align-items: stretch; gap: 0">
+<div style="padding: 14px; border-radius: 10px; border: 2px solid #D97A0B; background: #FFF8EF; display: flex; flex-direction: column; gap: 4px">
+<div style="font-size: 11px; font-weight: 600; color: #9A4B05; text-transform: uppercase; letter-spacing: 0.05em">Evidence · drove 0.82</div>
+<div style="font-size: 14px; font-weight: 600">EDD Policy v3 §2.1</div>
+<div style="font-size: 12px; color: #9A4B05; font-weight: 500">Replaced on 1 Jul 2026</div>
+</div>
+<div style="margin: 0 auto; width: 0; height: 28px; border-left: 2px dashed #D97A0B"></div>
+<div style="text-align: center; font-size: 11px; font-weight: 600; color: #9A4B05; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px">Replaced by</div>
+<div style="padding: 14px; border-radius: 10px; border: 1px dashed #1E7A4C; background: #F3FAF6; display: flex; flex-direction: column; gap: 4px">
+<div style="font-size: 14px; font-weight: 600">EDD Policy v4 §2.1</div>
+<div style="font-size: 12px; color: #1E7A4C; font-weight: 500">Current · not retrieved</div>
+</div>
+</div>
+<div aria-hidden="true" style="flex: none; width: 32px; padding-top: 30px"><svg width="32" height="12" viewBox="0 0 32 12" fill="none"><path d="M2 6h26" stroke="#8A8F9A" stroke-width="1.5"></path><path d="M24 2l4 4-4 4" stroke="#8A8F9A" stroke-width="1.5" fill="none"></path></svg></div>
+
+<div style="flex: 1 1 0; min-width: 0; padding: 14px; border-radius: 10px; border: 1px solid #F0B877; background: #FFF8EF; display: flex; flex-direction: column; gap: 4px">
+<div style="font-size: 11px; font-weight: 600; color: #9A4B05; text-transform: uppercase; letter-spacing: 0.05em">Claim</div>
+<div style="font-size: 14px; font-weight: 600">Custody not on EDD list</div>
+<div style="font-size: 12px; color: #5A5F6B">Risk agent, step 3</div>
+</div>
+<div aria-hidden="true" style="flex: none; width: 32px; padding-top: 30px"><svg width="32" height="12" viewBox="0 0 32 12" fill="none"><path d="M2 6h26" stroke="#8A8F9A" stroke-width="1.5"></path><path d="M24 2l4 4-4 4" stroke="#8A8F9A" stroke-width="1.5" fill="none"></path></svg></div>
+
+<div style="flex: 1 1 0; min-width: 0; padding: 14px; border-radius: 10px; border: 1px solid #F0B877; background: #FFF8EF; display: flex; flex-direction: column; gap: 4px">
+<div style="font-size: 11px; font-weight: 600; color: #9A4B05; text-transform: uppercase; letter-spacing: 0.05em">Claim</div>
+<div style="font-size: 14px; font-weight: 600">Risk score 22 of 100</div>
+<div style="font-size: 12px; color: #5A5F6B">Risk agent, step 4</div>
+</div>
+<div aria-hidden="true" style="flex: none; width: 32px; padding-top: 30px"><svg width="32" height="12" viewBox="0 0 32 12" fill="none"><path d="M2 6h26" stroke="#8A8F9A" stroke-width="1.5"></path><path d="M24 2l4 4-4 4" stroke="#8A8F9A" stroke-width="1.5" fill="none"></path></svg></div>
+
+<div style="flex: 1 1 0; min-width: 0; padding: 14px; border-radius: 10px; border: 1px solid #D5D7DD; display: flex; flex-direction: column; gap: 4px">
+<div style="font-size: 11px; font-weight: 600; color: #5A5F6B; text-transform: uppercase; letter-spacing: 0.05em">Handoff</div>
+<div style="font-size: 14px; font-weight: 600">Passed unchanged</div>
+<div style="font-size: 12px; color: #5A5F6B">Risk → Decision agent</div>
+</div>
+<div aria-hidden="true" style="flex: none; width: 32px; padding-top: 30px"><svg width="32" height="12" viewBox="0 0 32 12" fill="none"><path d="M2 6h26" stroke="#8A8F9A" stroke-width="1.5"></path><path d="M24 2l4 4-4 4" stroke="#8A8F9A" stroke-width="1.5" fill="none"></path></svg></div>
+
+<div style="flex: 1 1 0; min-width: 0; padding: 14px; border-radius: 10px; border: 1px solid #15171C; background: #15171C; color: #FFFFFF; display: flex; flex-direction: column; gap: 4px">
+<div style="font-size: 11px; font-weight: 600; color: #C9D0DC; text-transform: uppercase; letter-spacing: 0.05em">Decision · step 6</div>
+<div style="font-size: 14px; font-weight: 600">Approve account</div>
+<div style="font-size: 12px; color: #C9D0DC">No EDD review</div>
+</div>
+</div>
+</div>
+<p style="margin: 0; font-size: 14px; color: #5A5F6B">The replaced policy entered at the Risk agent's retrieval step and was passed to the Decision agent without being checked again.</p>
+</section>
+
+<section aria-label="Agent timeline" style="background: #FFFFFF; border: 1px solid #E3E4E8; border-radius: 12px; padding: 24px; display: flex; flex-direction: column; gap: 20px">
+<div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px">
+<h2 style="margin: 0; font-size: 16px; font-weight: 600">Agent timeline</h2>
+<span style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; background: #FDECEA; color: #B42318; font-size: 13px; font-weight: 600">Suspected root cause · confirmed by replay</span>
+</div>
+<div style="overflow-x: auto">
+<div style="display: grid; grid-template-columns: 180px repeat(6, minmax(0, 1fr)); gap: 0; min-width: 980px; font-size: 13px">
+<div style="padding: 0 0 10px; color: #5A5F6B; font-size: 12px; font-weight: 600">Agent</div>
+<div style="padding: 0 8px 10px; color: #5A5F6B; font-family: 'IBM Plex Mono', monospace; font-size: 12px">Step 1</div>
+<div style="padding: 0 8px 10px; color: #5A5F6B; font-family: 'IBM Plex Mono', monospace; font-size: 12px">Step 2</div>
+<div style="padding: 0 8px 10px; color: #B42318; font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600">Step 3 · first went wrong</div>
+<div style="padding: 0 8px 10px; color: #5A5F6B; font-family: 'IBM Plex Mono', monospace; font-size: 12px">Step 4</div>
+<div style="padding: 0 8px 10px; color: #5A5F6B; font-family: 'IBM Plex Mono', monospace; font-size: 12px">Step 5</div>
+<div style="padding: 0 8px 10px; color: #5A5F6B; font-family: 'IBM Plex Mono', monospace; font-size: 12px">Step 6</div>
+
+<div style="grid-column: 1; padding: 16px 0; border-top: 1px solid #E3E4E8; font-weight: 600">Document agent</div>
+<div style="grid-column: 2; padding: 12px 8px; border-top: 1px solid #E3E4E8"><div style="padding: 10px; border-radius: 8px; background: #E7F4EC; color: #1E7A4C; font-weight: 500">Parse documents</div></div>
+<div style="grid-column: 3; padding: 12px 8px; border-top: 1px solid #E3E4E8"><div style="padding: 10px; border-radius: 8px; background: #E7F4EC; color: #1E7A4C; font-weight: 500">Sanctions screening</div></div>
+<div style="grid-column: 4 / span 4; border-top: 1px solid #E3E4E8; background: #FFF7F6"></div>
+
+<div style="grid-column: 1; padding: 16px 0; border-top: 1px solid #E3E4E8; font-weight: 600">Risk agent</div>
+<div style="grid-column: 2 / span 2; border-top: 1px solid #E3E4E8"></div>
+<div style="grid-column: 4; padding: 12px 8px; border-top: 1px solid #E3E4E8; background: #FFF7F6"><div style="padding: 10px; border-radius: 8px; border: 2px solid #B42318; background: #FFFFFF; color: #B42318; font-weight: 600">Retrieve EDD v3</div></div>
+<div style="grid-column: 5; padding: 12px 8px; border-top: 1px solid #E3E4E8"><div style="padding: 10px; border-radius: 8px; background: #FDF1E3; color: #9A4B05; font-weight: 500">Score risk 22/100</div></div>
+<div style="grid-column: 6 / span 2; border-top: 1px solid #E3E4E8"></div>
+
+<div style="grid-column: 1; padding: 16px 0; border-top: 1px solid #E3E4E8; font-weight: 600">Decision agent</div>
+<div style="grid-column: 2 / span 2; border-top: 1px solid #E3E4E8"></div>
+<div style="grid-column: 4; border-top: 1px solid #E3E4E8; background: #FFF7F6"></div>
+<div style="grid-column: 5; border-top: 1px solid #E3E4E8"></div>
+<div style="grid-column: 6; padding: 12px 8px; border-top: 1px solid #E3E4E8"><div style="padding: 10px; border-radius: 8px; background: #FDF1E3; color: #9A4B05; font-weight: 500">Merge findings</div></div>
+<div style="grid-column: 7; padding: 12px 8px; border-top: 1px solid #E3E4E8"><div style="padding: 10px; border-radius: 8px; background: #15171C; color: #FFFFFF; font-weight: 500">Approve account</div></div>
+</div>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 20px">
+<div style="flex: 1 1 280px; padding: 16px; border-radius: 10px; background: #F6F6F3">
+<div style="font-size: 12px; font-weight: 600; color: #5A5F6B; text-transform: uppercase; letter-spacing: 0.04em">What the trace shows</div>
+<p style="margin: 6px 0 0; font-size: 14px; line-height: 1.55">All 6 steps succeeded, the right tools ran and latency was normal. A standard tracer marks this run healthy.</p>
+</div>
+<div style="flex: 1 1 280px; padding: 16px; border-radius: 10px; background: #FDF1E3">
+<div style="font-size: 12px; font-weight: 600; color: #9A4B05; text-transform: uppercase; letter-spacing: 0.04em">What Supersede adds</div>
+<p style="margin: 6px 0 0; font-size: 14px; line-height: 1.55">Step 3 pulled a policy that was replaced 3 months earlier. Every later step built on it.</p>
+</div>
+</div>
+</section>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1080}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

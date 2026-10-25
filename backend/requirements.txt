@@ -1,0 +1,4 @@
+# The engine (supersede/) uses only the Python standard library.
+# These are needed for the HTTP API only.
+fastapi
+uvicorn

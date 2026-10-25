@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Supersede · Audit packet KYC-2041</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;family=IBM+Plex+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Serif:wght@500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#F6F6F3;font-family:'IBM Plex Sans',system-ui,sans-serif;color:#15171C}
+a{color:#2647B8}a:hover{color:#1A3489}
+</style>
+</helmet>
+<div style="display: flex; flex-wrap: wrap; min-height: 1180px; background: #F6F6F3; font-family: 'IBM Plex Sans', system-ui, sans-serif; color: #15171C">
+
+<nav aria-label="Main" style="flex: 1 1 220px; max-width: 100%; background: #101826; color: #E7EAF0; padding: 24px 16px; box-sizing: border-box; display: flex; flex-direction: column; gap: 32px">
+<div style="display: flex; align-items: center; gap: 10px; padding: 0 8px">
+<svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true"><rect x="1" y="1" width="26" height="26" rx="7" stroke="#8FA8FF" stroke-width="2"></rect><path d="M8 18l5-8 3 5 4-6" stroke="#E7EAF0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+<div style="font-size: 18px; font-weight: 700; letter-spacing: -0.01em">Supersede</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 4px">
+<a href="Main.dc.html" style="display: block; padding: 12px; border-radius: 8px; color: #C9D0DC; text-decoration: none; font-size: 14px">Agent runs</a>
+<a href="Graph.dc.html" style="display: block; padding: 12px; border-radius: 8px; color: #C9D0DC; text-decoration: none; font-size: 14px">Traces</a>
+<a href="Replay.dc.html" style="display: block; padding: 12px; border-radius: 8px; color: #C9D0DC; text-decoration: none; font-size: 14px">Replays</a>
+<a href="Audit.dc.html" style="display: block; padding: 12px; border-radius: 8px; background: #1E2A40; color: #FFFFFF; text-decoration: none; font-weight: 600; font-size: 14px">Audit packets</a>
+<a href="Main.dc.html" style="display: block; padding: 12px; border-radius: 8px; color: #C9D0DC; text-decoration: none; font-size: 14px">Knowledge versions</a>
+</div>
+<div style="margin-top: auto; padding: 12px; border-radius: 8px; border: 1px solid #2B3850; font-size: 12px; line-height: 1.5; color: #9AA3B5">
+<div style="font-weight: 600; color: #E7EAF0">Harborline Bank</div>
+<div>Fictional bank · synthetic data</div>
+</div>
+</nav>
+
+<main style="flex: 999 1 560px; min-width: 0; padding: 32px 40px 48px; box-sizing: border-box; display: flex; flex-direction: column; gap: 20px">
+<div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px">
+<div style="font-size: 13px; color: #5A5F6B"><a href="Main.dc.html">Agent runs</a> / <a href="Answer.dc.html">KYC-2041</a> / Audit packet</div>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<button type="button" style="height: 44px; padding: 0 16px; border-radius: 8px; border: 1px solid #D5D7DD; background: #FFFFFF; font: inherit; font-size: 14px; font-weight: 500; color: #15171C">Download PROV-JSON</button>
+<button type="button" style="height: 44px; padding: 0 16px; border-radius: 8px; border: 1px solid #2647B8; background: #2647B8; font: inherit; font-size: 14px; font-weight: 600; color: #FFFFFF">Download PDF</button>
+</div>
+</div>
+
+<article style="max-width: 880px; width: 100%; box-sizing: border-box; margin: 0 auto; background: #FFFFFF; border: 1px solid #E3E4E8; border-radius: 12px; padding: 48px 56px; display: flex; flex-direction: column; gap: 28px">
+<header style="display: flex; flex-direction: column; gap: 10px; padding-bottom: 24px; border-bottom: 1px solid #E3E4E8">
+<div style="font-size: 12px; font-weight: 600; color: #5A5F6B; text-transform: uppercase; letter-spacing: 0.06em">Decision audit packet · for compliance review</div>
+<h1 style="margin: 0; font-family: 'IBM Plex Serif', Georgia, serif; font-size: 30px; font-weight: 600; letter-spacing: -0.01em">KYC onboarding: Meridian Ledger LLC</h1>
+<div style="display: flex; flex-wrap: wrap; gap: 8px 24px; font-size: 13px; color: #5A5F6B">
+<span>Run <span style="font-family: 'IBM Plex Mono', monospace; color: #15171C">KYC-2041</span></span>
+<span>Generated 15 Oct 2026, 11:05</span>
+<span>Integrity <span style="font-family: 'IBM Plex Mono', monospace; color: #15171C">sha256 9f2c…a41e</span></span>
+</div>
+</header>
+
+<section style="display: flex; flex-direction: column; gap: 8px">
+<h2 style="margin: 0; font-size: 17px; font-weight: 600">Summary</h2>
+<p style="margin: 0; font-size: 15px; line-height: 1.6">The AI agents auto-approved this account based on a policy version that had been replaced. Replaying the run with the current policy changes the decision to <strong>escalate to enhanced due diligence</strong>. The account is on hold pending reviewer action.</p>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 8px">
+<h2 style="margin: 0; font-size: 17px; font-weight: 600">Role of the AI system</h2>
+<p style="margin: 0; font-size: 15px; line-height: 1.6">Three agents ran in sequence: a Document agent checked identity and sanctions, a Risk agent scored the customer against bank policy, and a Decision agent recommended an outcome. No human reviewed the decision before approval.</p>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 12px">
+<h2 style="margin: 0; font-size: 17px; font-weight: 600">Main elements of the decision</h2>
+<div style="overflow-x: auto">
+<table style="width: 100%; min-width: 620px; border-collapse: collapse; font-size: 14px">
+<thead>
+<tr style="text-align: left; color: #5A5F6B; font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em">
+<th scope="col" style="padding: 10px 12px 10px 0; font-weight: 600">Claim</th>
+<th scope="col" style="padding: 10px 12px; font-weight: 600">Evidence</th>
+<th scope="col" style="padding: 10px 0 10px 12px; font-weight: 600">Status</th>
+</tr>
+</thead>
+<tbody>
+<tr style="border-top: 1px solid #E3E4E8"><td style="padding: 12px 12px 12px 0">Documents match registry</td><td style="padding: 12px">Business Registry record</td><td style="padding: 12px 0 12px 12px; color: #1E7A4C; font-weight: 600">Current</td></tr>
+<tr style="border-top: 1px solid #E3E4E8"><td style="padding: 12px 12px 12px 0">No sanctions matches</td><td style="padding: 12px">Screening tool result</td><td style="padding: 12px 0 12px 12px; color: #1E7A4C; font-weight: 600">Current</td></tr>
+<tr style="border-top: 1px solid #E3E4E8"><td style="padding: 12px 12px 12px 0">Custody not on EDD list</td><td style="padding: 12px">EDD Policy v3 §2.1</td><td style="padding: 12px 0 12px 12px; color: #9A4B05; font-weight: 600">Replaced by v4</td></tr>
+<tr style="border-top: 1px solid #E3E4E8"><td style="padding: 12px 12px 12px 0">Risk score 22 of 100</td><td style="padding: 12px">Derived from claim above</td><td style="padding: 12px 0 12px 12px; color: #9A4B05; font-weight: 600">Replaced by v4</td></tr>
+<tr style="border-top: 1px solid #E3E4E8"><td style="padding: 12px 12px 12px 0">Volume fits business size</td><td style="padding: 12px">None retrieved</td><td style="padding: 12px 0 12px 12px; color: #B42318; font-weight: 600">Not supported</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 8px">
+<h2 style="margin: 0; font-size: 17px; font-weight: 600">Root cause and correction</h2>
+<p style="margin: 0; font-size: 15px; line-height: 1.6">The Risk agent retrieved EDD Policy v3 at step 3. Version 4, effective 1 Jul 2026, adds virtual asset service providers to the escalation list. Replay with v4 changed only claims 3 and 4 and the final decision. Guard mode now blocks replaced versions for this workflow.</p>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 12px">
+<h2 style="margin: 0; font-size: 17px; font-weight: 600">Change log</h2>
+<ol style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 0; font-size: 14px">
+<li style="display: flex; flex-wrap: wrap; gap: 4px 16px; padding: 10px 0; border-top: 1px solid #E3E4E8"><span style="flex: 0 0 150px; font-family: 'IBM Plex Mono', monospace; color: #5A5F6B; font-size: 13px">01 Jul 2026</span><span style="flex: 1 1 300px">EDD Policy v4 marked as replacing v3 · approved by Financial Crimes Compliance</span></li>
+<li style="display: flex; flex-wrap: wrap; gap: 4px 16px; padding: 10px 0; border-top: 1px solid #E3E4E8"><span style="flex: 0 0 150px; font-family: 'IBM Plex Mono', monospace; color: #5A5F6B; font-size: 13px">15 Oct 10:42</span><span style="flex: 1 1 300px">Run KYC-2041 auto-approved by Decision agent</span></li>
+<li style="display: flex; flex-wrap: wrap; gap: 4px 16px; padding: 10px 0; border-top: 1px solid #E3E4E8"><span style="flex: 0 0 150px; font-family: 'IBM Plex Mono', monospace; color: #5A5F6B; font-size: 13px">15 Oct 10:58</span><span style="flex: 1 1 300px">Supersede flagged 2 claims on replaced evidence</span></li>
+<li style="display: flex; flex-wrap: wrap; gap: 4px 16px; padding: 10px 0; border-top: 1px solid #E3E4E8"><span style="flex: 0 0 150px; font-family: 'IBM Plex Mono', monospace; color: #5A5F6B; font-size: 13px">15 Oct 11:03</span><span style="flex: 1 1 300px">Replay confirmed cause; account placed on hold</span></li>
+</ol>
+</section>
+
+<section style="display: flex; flex-wrap: wrap; gap: 24px; padding-top: 24px; border-top: 1px solid #E3E4E8">
+<div style="flex: 1 1 240px">
+<div style="font-size: 12px; color: #5A5F6B; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em">Reviewer</div>
+<div style="margin-top: 24px; border-bottom: 1px solid #15171C; height: 1px"></div>
+<div style="margin-top: 6px; font-size: 13px; color: #5A5F6B">[REVIEWER NAME]</div>
+</div>
+<div style="flex: 1 1 240px">
+<div style="font-size: 12px; color: #5A5F6B; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em">Outcome</div>
+<div style="margin-top: 8px; display: flex; flex-wrap: wrap; gap: 8px">
+<button type="button" style="height: 44px; padding: 0 14px; border-radius: 8px; border: 1px solid #D5D7DD; background: #FFFFFF; font: inherit; font-size: 14px; color: #15171C">Confirm escalation</button>
+<button type="button" style="height: 44px; padding: 0 14px; border-radius: 8px; border: 1px solid #D5D7DD; background: #FFFFFF; font: inherit; font-size: 14px; color: #15171C">Override with note</button>
+</div>
+</div>
+</section>
+<p style="margin: 0; font-size: 12px; color: #5A5F6B">Synthetic data prepared for a hackathon demo. Harborline Bank and all customers are fictional.</p>
+</article>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1180}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

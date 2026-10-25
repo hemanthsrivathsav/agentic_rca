@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Supersede · Why KYC-2041 was approved</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#F6F6F3;font-family:'IBM Plex Sans',system-ui,sans-serif;color:#15171C}
+a{color:#2647B8}a:hover{color:#1A3489}
+button:focus-visible,a:focus-visible{outline:2px solid #2647B8;outline-offset:2px}
+.sp-move{transition:left .6s cubic-bezier(.65,0,.25,1),width .6s cubic-bezier(.65,0,.25,1),background-color .35s ease,color .35s ease,border-color .35s ease}
+@media (prefers-reduced-motion: reduce){.sp-move{transition:none}}
+</style>
+</helmet>
+<div style="display: flex; flex-wrap: wrap; min-height: 1100px; background: #F6F6F3; font-family: 'IBM Plex Sans', system-ui, sans-serif; color: #15171C">
+
+<nav aria-label="Main" style="flex: 1 1 220px; max-width: 100%; background: #101826; color: #E7EAF0; padding: 24px 16px; box-sizing: border-box; display: flex; flex-direction: column; gap: 32px">
+<div style="display: flex; align-items: center; gap: 10px; padding: 0 8px">
+<svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true"><rect x="1" y="1" width="26" height="26" rx="7" stroke="#8FA8FF" stroke-width="2"></rect><path d="M8 18l5-8 3 5 4-6" stroke="#E7EAF0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+<div style="font-size: 18px; font-weight: 700; letter-spacing: -0.01em">Supersede</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 4px">
+<a href="Main.dc.html" style="display: block; padding: 12px; border-radius: 8px; background: #1E2A40; color: #FFFFFF; text-decoration: none; font-weight: 600; font-size: 14px">Agent runs</a>
+<a href="Graph.dc.html" style="display: block; padding: 12px; border-radius: 8px; color: #C9D0DC; text-decoration: none; font-size: 14px">Traces</a>
+<a href="Replay.dc.html" style="display: block; padding: 12px; border-radius: 8px; color: #C9D0DC; text-decoration: none; font-size: 14px">Replays</a>
+<a href="Audit.dc.html" style="display: block; padding: 12px; border-radius: 8px; color: #C9D0DC; text-decoration: none; font-size: 14px">Audit packets</a>
+<a href="Main.dc.html" style="display: block; padding: 12px; border-radius: 8px; color: #C9D0DC; text-decoration: none; font-size: 14px">Knowledge versions</a>
+</div>
+<div style="margin-top: auto; padding: 12px; border-radius: 8px; border: 1px solid #2B3850; font-size: 12px; line-height: 1.5; color: #9AA3B5">
+<div style="font-weight: 600; color: #E7EAF0">Harborline Bank</div>
+<div>Fictional bank, synthetic data</div>
+</div>
+</nav>
+
+<main style="flex: 999 1 560px; min-width: 0; padding: 32px 40px 48px; box-sizing: border-box; display: flex; flex-direction: column; gap: 24px">
+<div style="font-size: 13px; color: #5A5F6B"><a href="Main.dc.html">Agent runs</a> / KYC-2041</div>
+
+<header style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 20px">
+<div style="max-width: 640px">
+<h1 style="margin: 0; font-size: 32px; line-height: 1.15; font-weight: 600; letter-spacing: -0.015em">Why Meridian Ledger LLC was approved</h1>
+<p style="margin: 8px 0 0; font-size: 15px; line-height: 1.5; color: #5A5F6B">KYC onboarding run on 15 Oct 2026 by the Document, Risk and Decision agents.</p>
+</div>
+<div role="group" aria-label="Evidence shown" style="display: inline-flex; padding: 4px; border-radius: 10px; background: #E7E8EC">
+<button type="button" class="sp-move" onClick="{{showRun}}" aria-pressed="{{runPressed}}" style="min-height: 44px; padding: 0 18px; border: 0; border-radius: 7px; background: {{runBg}}; color: {{runInk}}; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer">As the agents ran it</button>
+<button type="button" class="sp-move" onClick="{{showNow}}" aria-pressed="{{nowPressed}}" style="min-height: 44px; padding: 0 18px; border: 0; border-radius: 7px; background: {{nowBg}}; color: {{nowInk}}; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer">With current policy</button>
+</div>
+</header>
+
+<section aria-label="Policy version timeline" style="background: #FFFFFF; border: 1px solid #E3E4E8; border-radius: 12px; padding: 28px 32px 30px; display: flex; flex-wrap: wrap; gap: 32px; align-items: stretch">
+<div style="flex: 0 1 220px; display: flex; flex-direction: column; justify-content: center; gap: 6px">
+<div class="sp-move" style="font-family: 'IBM Plex Mono', monospace; font-size: 56px; line-height: 1; font-weight: 600; letter-spacing: -0.03em; color: {{ageInk}}">{{ageValue}}</div>
+<div style="font-size: 15px; line-height: 1.45; color: #3A3E47">{{ageLabel}}</div>
+</div>
+
+<div style="flex: 1 1 520px; min-width: 0">
+<div style="position: relative; height: 150px">
+<div style="position: absolute; left: 0; width: 63%; top: 34px; height: 40px; box-sizing: border-box; padding: 0 14px; display: flex; align-items: center; justify-content: space-between; border-radius: 6px 0 0 6px; background: #F1F2F4; border: 1px solid #D5D7DD; font-size: 13px">
+<span style="font-weight: 600">EDD Policy v3</span><span style="font-family: 'IBM Plex Mono', monospace; color: #5A5F6B">retired</span>
+</div>
+<div style="position: absolute; left: 63%; right: 0; top: 34px; height: 40px; box-sizing: border-box; padding: 0 14px; display: flex; align-items: center; justify-content: space-between; border-radius: 0 6px 6px 0; background: #E7F4EC; border: 1px solid #A9D5BB; border-left: 0; font-size: 13px">
+<span style="font-weight: 600; color: #155C39">EDD Policy v4</span><span style="font-family: 'IBM Plex Mono', monospace; color: #1E7A4C">in force</span>
+</div>
+
+<div style="position: absolute; left: 0; top: 0; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #5A5F6B">1 Jan 2026</div>
+<div style="position: absolute; left: 63%; top: 0; transform: translateX(-50%); font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600; color: #15171C">1 Jul</div>
+<div style="position: absolute; left: 63%; top: 22px; width: 1px; height: 62px; background: #15171C"></div>
+<div style="position: absolute; right: 0; top: 0; font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600; color: #15171C">15 Oct run</div>
+<div style="position: absolute; right: 0; top: 22px; width: 2px; height: 104px; background: #15171C"></div>
+
+<div class="sp-move" style="position: absolute; left: {{linkLeft}}; right: 1px; top: 84px; height: 30px; box-sizing: border-box; border: 1.5px dashed {{linkInk}}; border-top: 0; border-radius: 0 0 6px 6px"></div>
+<div class="sp-move" style="position: absolute; left: {{linkLeft}}; top: 74px; width: 10px; height: 10px; margin-left: -5px; border-radius: 50%; background: {{linkInk}}"></div>
+<div class="sp-move" style="position: absolute; left: {{linkLeft}}; top: 122px; font-size: 13px; font-weight: 600; color: {{linkInk}}; white-space: nowrap">{{linkLabel}}</div>
+</div>
+</div>
+</section>
+
+<div style="display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start">
+
+<section aria-label="Decision and claims" style="flex: 3 1 480px; min-width: 0; background: #FFFFFF; border: 1px solid #E3E4E8; border-radius: 12px; overflow: hidden">
+<div style="padding: 24px 28px; border-bottom: 1px solid #E3E4E8; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px">
+<div>
+<div style="font-size: 13px; color: #5A5F6B">Decision</div>
+<div class="sp-move" style="margin-top: 4px; font-size: 26px; font-weight: 600; letter-spacing: -0.01em; color: {{decisionInk}}">{{decision}}</div>
+</div>
+<span class="sp-move" style="display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 999px; border: 1px solid {{verdictLine}}; background: {{verdictBg}}; color: {{verdictInk}}; font-size: 13px; font-weight: 600">{{verdict}}</span>
+</div>
+
+<ol style="margin: 0; padding: 0; list-style: none">
+<li style="display: grid; grid-template-columns: 32px minmax(0, 1fr) 120px; gap: 12px; align-items: baseline; padding: 16px 28px; border-bottom: 1px solid #EEEFF2">
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #5A5F6B">01</span>
+<span style="font-size: 15px; line-height: 1.5">Registration documents match the state business registry.</span>
+<span style="font-size: 13px; font-weight: 600; color: #1E7A4C; text-align: right">Current</span>
+</li>
+<li style="display: grid; grid-template-columns: 32px minmax(0, 1fr) 120px; gap: 12px; align-items: baseline; padding: 16px 28px; border-bottom: 1px solid #EEEFF2">
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #5A5F6B">02</span>
+<span style="font-size: 15px; line-height: 1.5">Two beneficial owners were screened against sanctions lists with no matches.</span>
+<span style="font-size: 13px; font-weight: 600; color: #1E7A4C; text-align: right">Current</span>
+</li>
+<li class="sp-move" style="display: grid; grid-template-columns: 32px minmax(0, 1fr) 120px; gap: 12px; align-items: baseline; padding: 16px 28px; border-bottom: 1px solid #EEEFF2; background: {{rowBg}}">
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #5A5F6B">03</span>
+<span style="font-size: 15px; line-height: 1.5; font-weight: 500">{{c3}}<sc-if value="{{isNow}}" hint-placeholder-val="{{ false }}"><span style="display: block; margin-top: 4px; font-size: 13px; font-weight: 400; color: #5A5F6B; text-decoration: line-through">Digital asset custody is not on the EDD escalation list.</span></sc-if></span>
+<span class="sp-move" style="font-size: 13px; font-weight: 600; color: {{statusInk}}; text-align: right">{{c3Status}}</span>
+</li>
+<li class="sp-move" style="display: grid; grid-template-columns: 32px minmax(0, 1fr) 120px; gap: 12px; align-items: baseline; padding: 16px 28px; border-bottom: 1px solid #EEEFF2; background: {{rowBg}}">
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #5A5F6B">04</span>
+<span style="font-size: 15px; line-height: 1.5">{{c4}}<sc-if value="{{isNow}}" hint-placeholder-val="{{ false }}"><span style="display: block; margin-top: 4px; font-size: 13px; color: #5A5F6B; text-decoration: line-through">Risk score 22 of 100 (low), so no enhanced due diligence is needed.</span></sc-if></span>
+<span class="sp-move" style="font-size: 13px; font-weight: 600; color: {{statusInk}}; text-align: right">{{c4Status}}</span>
+</li>
+<li style="display: grid; grid-template-columns: 32px minmax(0, 1fr) 120px; gap: 12px; align-items: baseline; padding: 16px 28px">
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #5A5F6B">05</span>
+<span style="font-size: 15px; line-height: 1.5">Expected monthly volume fits the stated business size.</span>
+<span style="font-size: 13px; font-weight: 600; color: #B42318; text-align: right">No source</span>
+</li>
+</ol>
+</section>
+
+<aside aria-label="Evidence for claim 3" style="flex: 2 1 340px; min-width: 0; background: #FFFFFF; border: 1px solid #E3E4E8; border-radius: 12px; padding: 24px; display: flex; flex-direction: column; gap: 16px">
+<div style="font-size: 13px; color: #5A5F6B">Evidence behind claim 03</div>
+<div style="display: flex; align-items: baseline; justify-content: space-between; gap: 12px">
+<div class="sp-move" style="font-size: 18px; font-weight: 600">{{srcTitle}}</div>
+<span class="sp-move" style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600; color: {{statusInk}}">{{srcState}}</span>
+</div>
+<blockquote class="sp-move" style="margin: 0; padding: 4px 0 4px 16px; border-left: 2px solid {{statusInk}}; font-size: 15px; line-height: 1.6; color: #3A3E47">{{srcQuote}}</blockquote>
+<div>
+<div style="display: flex; justify-content: space-between; font-size: 13px; color: #5A5F6B"><span>Share of the claim this source drove</span><span style="font-family: 'IBM Plex Mono', monospace; color: #15171C; font-weight: 600">{{drovePct}}</span></div>
+<div style="margin-top: 8px; height: 6px; border-radius: 3px; background: #ECEDF0"><div class="sp-move" style="width: {{drovePct}}; height: 6px; border-radius: 3px; background: {{statusInk}}"></div></div>
+</div>
+<div style="padding: 14px 16px; border-radius: 8px; background: #F6F6F3; font-size: 14px; line-height: 1.5; color: #3A3E47">{{srcNote}}</div>
+<a href="Graph.dc.html" style="display: inline-flex; align-items: center; justify-content: center; min-height: 44px; border-radius: 8px; border: 1px solid #D5D7DD; color: #15171C; font-size: 14px; font-weight: 600; text-decoration: none">Open the full trace</a>
+</aside>
+</div>
+
+<section aria-label="Agent steps" style="background: #FFFFFF; border: 1px solid #E3E4E8; border-radius: 12px; padding: 24px 28px; display: flex; flex-direction: column; gap: 18px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; align-items: baseline">
+<h2 style="margin: 0; font-size: 16px; font-weight: 600">Where it went wrong</h2>
+<span style="font-size: 13px; color: #5A5F6B">{{stepsCaption}}</span>
+</div>
+<ol style="margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px">
+<li style="padding: 12px; border-radius: 8px; border: 1px solid #E3E4E8"><div style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #5A5F6B">Document</div><div style="margin-top: 4px; font-size: 14px; font-weight: 500">Parse documents</div></li>
+<li style="padding: 12px; border-radius: 8px; border: 1px solid #E3E4E8"><div style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #5A5F6B">Document</div><div style="margin-top: 4px; font-size: 14px; font-weight: 500">Sanctions check</div></li>
+<li class="sp-move" style="padding: 12px; border-radius: 8px; border: 2px solid {{s3Line}}; background: {{s3Bg}}"><div style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: {{s3Ink}}; font-weight: 600">{{s3Tag}}</div><div style="margin-top: 4px; font-size: 14px; font-weight: 600">{{s3Text}}</div></li>
+<li class="sp-move" style="padding: 12px; border-radius: 8px; border: 1px solid {{tailLine}}; background: {{tailBg}}"><div style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #5A5F6B">Risk</div><div style="margin-top: 4px; font-size: 14px; font-weight: 500">{{s4Text}}</div></li>
+<li class="sp-move" style="padding: 12px; border-radius: 8px; border: 1px solid {{tailLine}}; background: {{tailBg}}"><div style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #5A5F6B">Decision</div><div style="margin-top: 4px; font-size: 14px; font-weight: 500">Merge findings</div></li>
+<li class="sp-move" style="padding: 12px; border-radius: 8px; border: 1px solid {{tailLine}}; background: {{tailBg}}"><div style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #5A5F6B">Decision</div><div style="margin-top: 4px; font-size: 14px; font-weight: 500">{{s6Text}}</div></li>
+</ol>
+</section>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1100}}'>
+class Component extends DCLogic {
+renderVals() {
+const now = !!(this.state && this.state.now);
+const set = (v) => () => this.setState({ now: v });
+const amber = '#9A4B05', green = '#1E7A4C';
+return {
+isNow: now,
+showRun: set(false),
+showNow: set(true),
+runPressed: now ? 'false' : 'true',
+nowPressed: now ? 'true' : 'false',
+runBg: now ? 'transparent' : '#FFFFFF',
+runInk: now ? '#5A5F6B' : '#15171C',
+nowBg: now ? '#FFFFFF' : 'transparent',
+nowInk: now ? '#15171C' : '#5A5F6B',
+ageValue: now ? '0 days' : '106 days',
+ageInk: now ? green : amber,
+ageLabel: now ? 'The replay uses the policy in force on the run date.' : 'How out of date the policy was when the Risk agent used it.',
+linkLeft: now ? '82%' : '30%',
+linkInk: now ? green : amber,
+linkLabel: now ? 'Replay retrieves v4' : 'Risk agent retrieved v3',
+decision: now ? 'Escalate to EDD review' : 'Approve account',
+decisionInk: now ? '#15171C' : '#15171C',
+verdict: now ? 'Matches current policy' : 'Built on a retired policy',
+verdictBg: now ? '#E7F4EC' : '#FDF1E3',
+verdictInk: now ? '#155C39' : amber,
+verdictLine: now ? '#A9D5BB' : '#F0B877',
+rowBg: now ? '#F5FBF7' : '#FFF9F1',
+statusInk: now ? green : amber,
+c3: now ? 'Digital asset custody is a virtual asset service provider, which requires EDD.' : 'Digital asset custody is not on the EDD escalation list.',
+c3Status: now ? 'Changed' : 'Retired policy',
+c4: now ? 'Risk score 71 of 100 (high), so enhanced due diligence is required.' : 'Risk score 22 of 100 (low), so no enhanced due diligence is needed.',
+c4Status: now ? 'Changed' : 'Retired policy',
+srcTitle: now ? 'EDD Policy v4, section 2.1' : 'EDD Policy v3, section 2.1',
+srcState: now ? 'IN FORCE' : 'RETIRED 1 JUL',
+srcQuote: now ? '“Escalate to EDD: money services businesses, casinos, dealers in precious metals and virtual asset service providers, including custody and exchange businesses.”' : '“Escalate to EDD: money services businesses, casinos and dealers in precious metals.”',
+drovePct: now ? '79%' : '82%',
+srcNote: now ? 'Only claims 03 and 04 changed. Claim 05 still has no source and stays flagged for a reviewer.' : 'The agent’s own explanation says it checked the latest policy. The retrieval log shows it read v3.',
+stepsCaption: now ? 'Replayed from step 3 with v4; steps 1 and 2 reused from cache' : 'Every step succeeded, so a standard tracer shows this run as healthy',
+s3Tag: now ? 'Risk, rerun' : 'Risk, first wrong step',
+s3Text: now ? 'Retrieve EDD v4' : 'Retrieve EDD v3',
+s3Line: now ? '#A9D5BB' : '#B42318',
+s3Bg: now ? '#F5FBF7' : '#FEF6F5',
+s3Ink: now ? green : '#B42318',
+s4Text: now ? 'Score risk: 71' : 'Score risk: 22',
+tailLine: now ? '#A9D5BB' : '#F0B877',
+tailBg: now ? '#F5FBF7' : '#FFF9F1',
+s6Text: now ? 'Escalate to EDD' : 'Approve account'
+};
+}
+}
+</script>
+</body>
+</html>

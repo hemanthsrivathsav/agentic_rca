@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Supersede · Runs</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&amp;family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;1,8..60,400&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#EEF1EF;font-family:'Public Sans',system-ui,sans-serif;color:#13201F;font-variant-numeric:tabular-nums}
+a{color:#0E5F55}a:hover{color:#0A463F}
+button{font:inherit}
+button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid #43C6AC;outline-offset:2px}
+</style>
+</helmet>
+<div style="min-height: 1060px; background: #EEF1EF; color: #13201F; font-family: 'Public Sans', system-ui, sans-serif; display: flex; flex-direction: column">
+
+<header style="display: flex; flex-wrap: wrap; align-items: center; gap: 16px 28px; padding: 14px 24px; background: #FFFFFF; border-bottom: 1px solid #DCE2DF">
+<div style="display: flex; align-items: center; gap: 10px">
+<svg width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true"><rect x="1" y="1" width="24" height="24" rx="6" fill="#0E1D21"></rect><circle cx="8" cy="17" r="2.5" fill="#FF6A55"></circle><circle cx="18" cy="9" r="2.5" fill="#43C6AC"></circle><path d="M10 15.5L16 10.5" stroke="#E6EEEC" stroke-width="1.6"></path></svg>
+<span style="font-size: 17px; font-weight: 700; letter-spacing: -0.01em">Supersede</span>
+</div>
+<nav aria-label="Main" style="display: flex; flex-wrap: wrap; gap: 4px; font-size: 14px">
+<a href="V2-Overview.dc.html" style="padding: 10px 12px; border-radius: 8px; background: #EEF1EF; color: #13201F; text-decoration: none; font-weight: 600">Runs</a>
+<a href="V2-Decision.dc.html" style="padding: 10px 12px; border-radius: 8px; color: #5E6B6A; text-decoration: none">Decision graph</a>
+<a href="V2-Overview.dc.html" style="padding: 10px 12px; border-radius: 8px; color: #5E6B6A; text-decoration: none">Breakpoints</a>
+<a href="V2-Overview.dc.html" style="padding: 10px 12px; border-radius: 8px; color: #5E6B6A; text-decoration: none">Knowledge versions</a>
+</nav>
+<div style="margin-left: auto; display: flex; align-items: center; gap: 12px; font-size: 13px; color: #5E6B6A">
+<span>Harborline Bank, synthetic data</span>
+<span aria-hidden="true" style="width: 32px; height: 32px; border-radius: 50%; background: #DCE2DF; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #13201F">HS</span>
+</div>
+</header>
+
+<div style="padding: 24px 24px 40px; display: flex; flex-direction: column; gap: 20px; max-width: 1392px; width: 100%; box-sizing: border-box; margin: 0 auto">
+
+<section aria-label="What needs attention" style="background: #0E1D21; color: #E6EEEC; border-radius: 16px; padding: 28px; display: flex; flex-wrap: wrap; gap: 28px 40px">
+<div style="flex: 1 1 340px; max-width: 480px; display: flex; flex-direction: column; gap: 14px">
+<h1 style="margin: 0; font-family: 'Source Serif 4', Georgia, serif; font-size: 34px; line-height: 1.15; font-weight: 500; color: #F4F7F6">7 decisions this week rest on a retired policy.</h1>
+<p style="margin: 0; font-size: 14.5px; line-height: 1.55; color: #8FA6AB">All of them trace back to EDD Policy v3 §2.1, replaced on 1 Jul 2026. Every one of these runs reported success in standard tracing.</p>
+<div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px">
+<a href="V2-Decision.dc.html" style="display: inline-flex; align-items: center; min-height: 44px; padding: 0 16px; border-radius: 8px; background: #F4F7F6; color: #0E1D21; font-size: 14px; font-weight: 700; text-decoration: none">Open the worst case</a>
+<button type="button" style="min-height: 44px; padding: 0 16px; border-radius: 8px; border: 1px solid #2F4E56; background: transparent; color: #E6EEEC; font-size: 14px; font-weight: 600; cursor: pointer">Replay all 7 with v4</button>
+</div>
+</div>
+
+<ol aria-label="Ranked by exposure" style="flex: 1 1 460px; margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column">
+<sc-for list="{{ranked}}" as="r" hint-placeholder-count="4">
+<li style="display: grid; grid-template-columns: 28px minmax(0, 1fr) 150px; gap: 14px; align-items: center; padding: 14px 0; border-top: 1px solid #1E363C">
+<span style="font-size: 13px; color: #8FA6AB">{{r.rank}}</span>
+<div style="min-width: 0">
+<a href="V2-Decision.dc.html" style="color: #F4F7F6; font-weight: 600; font-size: 15px; text-decoration: none">{{r.subject}}</a>
+<div style="margin-top: 2px; font-size: 13px; color: #8FA6AB">{{r.detail}}</div>
+</div>
+<div>
+<div style="height: 6px; border-radius: 3px; background: #1B3239"><div style="width: {{r.w}}; height: 6px; border-radius: 3px; background: #FF6A55"></div></div>
+<div style="margin-top: 6px; font-size: 12.5px; color: #FF8A78; text-align: right">{{r.impact}}</div>
+</div>
+</li>
+</sc-for>
+</ol>
+</section>
+
+<section aria-label="This week" style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px">
+<div style="background: #FFFFFF; border: 1px solid #DCE2DF; border-radius: 12px; padding: 16px 18px"><div style="font-size: 13px; color: #5E6B6A">Runs traced</div><div style="margin-top: 4px; font-size: 26px; font-weight: 700">248</div><div style="font-size: 12.5px; color: #5E6B6A">across 4 workflows</div></div>
+<div style="background: #FFFFFF; border: 1px solid #DCE2DF; border-radius: 12px; padding: 16px 18px"><div style="font-size: 13px; color: #5E6B6A">Paused by a breakpoint</div><div style="margin-top: 4px; font-size: 26px; font-weight: 700">3</div><div style="font-size: 12.5px; color: #5E6B6A">2 forked, 1 waiting for you</div></div>
+<div style="background: #FFFFFF; border: 1px solid #DCE2DF; border-radius: 12px; padding: 16px 18px"><div style="font-size: 13px; color: #5E6B6A">Built on replaced evidence</div><div style="margin-top: 4px; font-size: 26px; font-weight: 700; color: #C2412F">7</div><div style="font-size: 12.5px; color: #5E6B6A">confirmed by replay: 5</div></div>
+<div style="background: #FFFFFF; border: 1px solid #DCE2DF; border-radius: 12px; padding: 16px 18px"><div style="font-size: 13px; color: #5E6B6A">Claims without a source</div><div style="margin-top: 4px; font-size: 26px; font-weight: 700; color: #8A5E00">12</div><div style="font-size: 12.5px; color: #5E6B6A">in 9 runs</div></div>
+</section>
+
+<div style="display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start">
+
+<section aria-label="All runs" style="flex: 999 1 640px; min-width: 0; background: #FFFFFF; border: 1px solid #DCE2DF; border-radius: 12px; overflow: hidden">
+<div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 20px; border-bottom: 1px solid #E7ECEA">
+<h2 style="margin: 0; font-size: 16px; font-weight: 700">All runs</h2>
+<div role="group" aria-label="Filter runs" style="display: flex; flex-wrap: wrap; gap: 6px">
+<sc-for list="{{chips}}" as="c" hint-placeholder-count="4">
+<button type="button" onClick="{{c.pick}}" aria-pressed="{{c.pressed}}" style="min-height: 36px; padding: 0 12px; border-radius: 999px; border: 1px solid {{c.line}}; background: {{c.bg}}; color: {{c.ink}}; font-size: 13px; font-weight: 600; cursor: pointer">{{c.label}}</button>
+</sc-for>
+</div>
+</div>
+<div style="overflow-x: auto">
+<table style="width: 100%; min-width: 760px; border-collapse: collapse; font-size: 14px">
+<thead><tr style="text-align: left; font-size: 12.5px; color: #5E6B6A">
+<th scope="col" style="padding: 12px 20px; font-weight: 600">Run</th>
+<th scope="col" style="padding: 12px 12px; font-weight: 600">Subject</th>
+<th scope="col" style="padding: 12px 12px; font-weight: 600">Decision</th>
+<th scope="col" style="padding: 12px 12px; font-weight: 600">Evidence</th>
+<th scope="col" style="padding: 12px 12px; font-weight: 600">Finding</th>
+<th scope="col" style="padding: 12px 20px 12px 12px; font-weight: 600">When</th>
+</tr></thead>
+<tbody>
+<sc-for list="{{runs}}" as="r" hint-placeholder-count="7">
+<tr style="border-top: 1px solid #E7ECEA">
+<td style="padding: 14px 20px"><a href="V2-Decision.dc.html" style="font-weight: 600">{{r.id}}</a><div style="font-size: 12.5px; color: #5E6B6A">{{r.flow}}</div></td>
+<td style="padding: 14px 12px">{{r.subject}}</td>
+<td style="padding: 14px 12px">{{r.decision}}</td>
+<td style="padding: 14px 12px; width: 150px">
+<div role="img" aria-label="{{r.evLabel}}" style="display: flex; gap: 2px; height: 8px; width: 120px">
+<span style="width: {{r.okW}}; background: #0E7A68; border-radius: 2px"></span>
+<span style="width: {{r.badW}}; background: #C2412F; border-radius: 2px"></span>
+<span style="width: {{r.noW}}; background: #E3B04B; border-radius: 2px"></span>
+</div>
+<div style="margin-top: 4px; font-size: 12px; color: #5E6B6A">{{r.evLabel}}</div>
+</td>
+<td style="padding: 14px 12px; font-weight: 600; color: {{r.ink}}">{{r.finding}}</td>
+<td style="padding: 14px 20px 14px 12px; color: #5E6B6A">{{r.when}}</td>
+</tr>
+</sc-for>
+</tbody>
+</table>
+</div>
+</section>
+
+<section aria-label="Knowledge changes" style="flex: 1 1 320px; min-width: 0; background: #FFFFFF; border: 1px solid #DCE2DF; border-radius: 12px; padding: 18px 20px">
+<h2 style="margin: 0; font-size: 16px; font-weight: 700">Recently replaced</h2>
+<p style="margin: 4px 0 0; font-size: 13px; color: #5E6B6A; line-height: 1.5">Sources, definitions and data that changed, and the runs still using the old version.</p>
+<ol style="margin: 16px 0 0; padding: 0; list-style: none">
+<li style="position: relative; padding: 0 0 18px 22px">
+<span aria-hidden="true" style="position: absolute; left: 4px; top: 5px; width: 8px; height: 8px; border-radius: 50%; background: #C2412F"></span>
+<span aria-hidden="true" style="position: absolute; left: 7.5px; top: 17px; bottom: 0; width: 1px; background: #DCE2DF"></span>
+<div style="font-size: 12.5px; color: #5E6B6A">1 Jul 2026, document</div>
+<div style="font-weight: 600; font-size: 14.5px; margin-top: 2px">EDD Policy v4 replaced v3</div>
+<div style="font-size: 13px; color: #C2412F; margin-top: 2px">7 runs still read v3</div>
+</li>
+<li style="position: relative; padding: 0 0 18px 22px">
+<span aria-hidden="true" style="position: absolute; left: 4px; top: 5px; width: 8px; height: 8px; border-radius: 50%; background: #C2412F"></span>
+<span aria-hidden="true" style="position: absolute; left: 7.5px; top: 17px; bottom: 0; width: 1px; background: #DCE2DF"></span>
+<div style="font-size: 12.5px; color: #5E6B6A">1 Jan 2026, document</div>
+<div style="font-weight: 600; font-size: 14.5px; margin-top: 2px">Fee Schedule 2026 replaced 2025</div>
+<div style="font-size: 13px; color: #C2412F; margin-top: 2px">2 chatbot answers quoted 2025 fees</div>
+</li>
+<li style="position: relative; padding: 0 0 18px 22px">
+<span aria-hidden="true" style="position: absolute; left: 4px; top: 5px; width: 8px; height: 8px; border-radius: 50%; background: #8A5E00"></span>
+<span aria-hidden="true" style="position: absolute; left: 7.5px; top: 17px; bottom: 0; width: 1px; background: #DCE2DF"></span>
+<div style="font-size: 12.5px; color: #5E6B6A">3 Sep 2026, metric definition</div>
+<div style="font-weight: 600; font-size: 14.5px; margin-top: 2px">"Active customer" v2 replaced v1</div>
+<div style="font-size: 13px; color: #8A5E00; margin-top: 2px">1 scorecard used v1</div>
+</li>
+<li style="position: relative; padding: 0 0 0 22px">
+<span aria-hidden="true" style="position: absolute; left: 4px; top: 5px; width: 8px; height: 8px; border-radius: 50%; background: #0E7A68"></span>
+<div style="font-size: 12.5px; color: #5E6B6A">12 Oct 2026, data table</div>
+<div style="font-weight: 600; font-size: 14.5px; margin-top: 2px">fees_monthly refreshed</div>
+<div style="font-size: 13px; color: #0E7A68; margin-top: 2px">No runs affected</div>
+</li>
+</ol>
+</section>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1060}}'>
+class Component extends DCLogic {
+renderVals() {
+const s = this.state || {};
+const filter = s.filter || 'all';
+const all = [
+{ id: 'KYC-2041', flow: 'KYC onboarding', subject: 'Meridian Ledger LLC', decision: 'Approved', ok: 2, bad: 2, no: 1, finding: 'Decision used replaced policy', kind: 'bad', when: 'Today, 10:42' },
+{ id: 'KYC-2040', flow: 'KYC onboarding', subject: 'Bluefin Logistics Inc.', decision: 'Approved', ok: 5, bad: 0, no: 0, finding: 'All evidence current', kind: 'ok', when: 'Today, 10:15' },
+{ id: 'CHAT-5512', flow: 'Customer chatbot', subject: 'Overdraft fee question', decision: 'Answered', ok: 1, bad: 1, no: 0, finding: 'Quoted 2025 fee schedule', kind: 'bad', when: 'Today, 09:58' },
+{ id: 'KYC-2039', flow: 'KYC onboarding', subject: 'Okafor & Reyes Dental', decision: 'Escalated', ok: 4, bad: 0, no: 1, finding: '1 claim without a source', kind: 'no', when: 'Today, 09:41' },
+{ id: 'KYC-2036', flow: 'KYC onboarding', subject: 'Tidewater Coin Exchange', decision: 'Paused at step 3', ok: 3, bad: 1, no: 0, finding: 'Waiting for you at a breakpoint', kind: 'bad', when: 'Yesterday, 16:20' },
+{ id: 'RPT-0310', flow: 'Branch scorecard', subject: 'Branch 12, September', decision: 'Published', ok: 3, bad: 1, no: 0, finding: 'Used retired metric definition', kind: 'bad', when: 'Yesterday, 14:02' },
+{ id: 'SQL-0877', flow: 'Data chatbot', subject: 'Q3 overdraft fee revenue', decision: 'Answered', ok: 2, bad: 0, no: 1, finding: 'Number not traced to a query', kind: 'no', when: 'Yesterday, 11:30' }
+];
+const inks = { bad: '#C2412F', ok: '#0E7A68', no: '#8A5E00' };
+const runs = all.filter((r) => filter === 'all' || r.kind === filter).map((r) => {
+const total = r.ok + r.bad + r.no;
+const pct = (v) => (v / total * 100) + '%';
+return Object.assign({}, r, {
+okW: pct(r.ok), badW: pct(r.bad), noW: pct(r.no), ink: inks[r.kind],
+evLabel: r.ok + ' current, ' + r.bad + ' replaced, ' + r.no + ' unsourced'
+});
+});
+const chips = [['all', 'All 7'], ['bad', 'Replaced evidence'], ['no', 'No source'], ['ok', 'Healthy']].map((c) => {
+const on = filter === c[0];
+return { label: c[1], pressed: on ? 'true' : 'false', bg: on ? '#13201F' : '#FFFFFF', ink: on ? '#FFFFFF' : '#13201F', line: on ? '#13201F' : '#C9D2CF', pick: () => this.setState({ filter: c[0] }) };
+});
+const ranked = [
+{ rank: '1', subject: 'KYC-2041, Meridian Ledger LLC', detail: 'Digital asset custody approved without due diligence', impact: 'Account opened', w: '100%' },
+{ rank: '2', subject: 'KYC-2036, Tidewater Coin Exchange', detail: 'Paused before approval, waiting for a reviewer', impact: 'Decision on hold', w: '78%' },
+{ rank: '3', subject: 'RPT-0310, Branch 12 scorecard', detail: 'Active customers reported as +18%, replay shows +6%', impact: 'Report published', w: '54%' },
+{ rank: '4', subject: 'CHAT-5512, overdraft fee answer', detail: 'Customer told last year’s fee', impact: 'Customer-facing', w: '36%' }
+];
+return { runs, chips, ranked };
+}
+}
+</script>
+</body>
+</html>

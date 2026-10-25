@@ -1,0 +1,64 @@
+[
+  {
+    "run_id": "KYC-2041",
+    "name": "Meridian Ledger LLC",
+    "business_type": "digital asset custody",
+    "business_label": "Digital asset custody",
+    "base_risk": 22,
+    "beneficial_owners": ["Dana Whitlow", "Arun Mehta"],
+    "registry_match": true,
+    "run_time": "2026-10-15",
+    "created_at": "2026-10-15T10:42:00+00:00",
+    "options": {"breakpoints": false},
+    "note": "Historical run, recorded before breakpoints were switched on. The demo's main case."
+  },
+  {
+    "run_id": "KYC-2040",
+    "name": "Bluefin Logistics Inc.",
+    "business_type": "freight forwarding",
+    "business_label": "Freight forwarding",
+    "base_risk": 18,
+    "beneficial_owners": ["Marisol Ortega"],
+    "registry_match": true,
+    "run_time": "2026-10-15",
+    "created_at": "2026-10-15T10:15:00+00:00",
+    "options": {"breakpoints": false}
+  },
+  {
+    "run_id": "KYC-2039",
+    "name": "Okafor & Reyes Dental",
+    "business_type": "healthcare practice",
+    "business_label": "Healthcare practice",
+    "base_risk": 31,
+    "beneficial_owners": ["Chidi Okafor", "Lucia Reyes"],
+    "registry_match": true,
+    "run_time": "2026-10-15",
+    "created_at": "2026-10-15T09:41:00+00:00",
+    "options": {"breakpoints": false}
+  },
+  {
+    "run_id": "KYC-2036",
+    "name": "Tidewater Coin Exchange",
+    "business_type": "virtual asset exchange",
+    "business_label": "Virtual asset exchange",
+    "base_risk": 26,
+    "beneficial_owners": ["Hollis Brandt", "Mei Tanaka"],
+    "registry_match": true,
+    "run_time": "2026-10-14",
+    "created_at": "2026-10-14T16:20:00+00:00",
+    "options": {"breakpoints": true},
+    "note": "Run with breakpoints on: pauses when the retired policy enters the context."
+  },
+  {
+    "run_id": "KYC-2033",
+    "name": "Granite Peak Builders",
+    "business_type": "construction",
+    "business_label": "Construction",
+    "base_risk": 20,
+    "beneficial_owners": ["Owen Gallagher"],
+    "registry_match": true,
+    "run_time": "2026-10-14",
+    "created_at": "2026-10-14T14:02:00+00:00",
+    "options": {"breakpoints": false}
+  }
+]

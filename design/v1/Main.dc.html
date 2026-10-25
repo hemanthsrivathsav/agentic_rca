@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Supersede · Runs overview</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;family=IBM+Plex+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#F6F6F3;font-family:'IBM Plex Sans',system-ui,sans-serif;color:#15171C}
+a{color:#2647B8}a:hover{color:#1A3489}
+</style>
+</helmet>
+<div style="display: flex; flex-wrap: wrap; min-height: 960px; background: #F6F6F3; font-family: 'IBM Plex Sans', system-ui, sans-serif; color: #15171C">
+
+<nav aria-label="Main" style="flex: 1 1 220px; max-width: 100%; background: #101826; color: #E7EAF0; padding: 24px 16px; box-sizing: border-box; display: flex; flex-direction: column; gap: 32px">
+<div style="display: flex; align-items: center; gap: 10px; padding: 0 8px">
+<svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true"><rect x="1" y="1" width="26" height="26" rx="7" stroke="#8FA8FF" stroke-width="2"></rect><path d="M8 18l5-8 3 5 4-6" stroke="#E7EAF0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+<div style="font-size: 18px; font-weight: 700; letter-spacing: -0.01em">Supersede</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 4px">
+<a href="Main.dc.html" style="display: block; padding: 12px; border-radius: 8px; background: #1E2A40; color: #FFFFFF; text-decoration: none; font-weight: 600; font-size: 14px">Agent runs</a>
+<a href="Graph.dc.html" style="display: block; padding: 12px; border-radius: 8px; color: #C9D0DC; text-decoration: none; font-size: 14px">Traces</a>
+<a href="Replay.dc.html" style="display: block; padding: 12px; border-radius: 8px; color: #C9D0DC; text-decoration: none; font-size: 14px">Replays</a>
+<a href="Audit.dc.html" style="display: block; padding: 12px; border-radius: 8px; color: #C9D0DC; text-decoration: none; font-size: 14px">Audit packets</a>
+<a href="Main.dc.html" style="display: block; padding: 12px; border-radius: 8px; color: #C9D0DC; text-decoration: none; font-size: 14px">Knowledge versions</a>
+</div>
+<div style="margin-top: auto; padding: 12px; border-radius: 8px; border: 1px solid #2B3850; font-size: 12px; line-height: 1.5; color: #9AA3B5">
+<div style="font-weight: 600; color: #E7EAF0">Harborline Bank</div>
+<div>Fictional bank · synthetic data</div>
+</div>
+</nav>
+
+<main style="flex: 999 1 560px; min-width: 0; padding: 32px 40px 48px; box-sizing: border-box; display: flex; flex-direction: column; gap: 24px">
+<header style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px">
+<div>
+<div style="font-size: 13px; color: #5A5F6B; font-weight: 500">Workflow · KYC onboarding</div>
+<h1 style="margin: 4px 0 0; font-size: 28px; font-weight: 600; letter-spacing: -0.01em">Agent runs</h1>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<label style="display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 12px; border: 1px solid #D5D7DD; border-radius: 8px; background: #FFFFFF; font-size: 14px; color: #5A5F6B">
+<svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="7" cy="7" r="5" stroke="#5A5F6B" stroke-width="1.5"></circle><path d="M11 11l3 3" stroke="#5A5F6B" stroke-width="1.5" stroke-linecap="round"></path></svg>
+<span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Search runs</span>
+<input type="search" placeholder="Search by run, customer or agent" style="border: 0; outline: none; font: inherit; color: #15171C; width: 240px; background: transparent">
+</label>
+<button type="button" style="height: 44px; padding: 0 16px; border-radius: 8px; border: 1px solid #D5D7DD; background: #FFFFFF; font: inherit; font-size: 14px; font-weight: 500; color: #15171C">Last 7 days</button>
+<button type="button" style="height: 44px; padding: 0 16px; border-radius: 8px; border: 1px solid #2647B8; background: #2647B8; font: inherit; font-size: 14px; font-weight: 600; color: #FFFFFF">Connect OTel source</button>
+</div>
+</header>
+
+<section aria-label="Summary" style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px">
+<div style="background: #FFFFFF; border: 1px solid #E3E4E8; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 6px">
+<div style="font-size: 13px; color: #5A5F6B">Runs traced</div>
+<div style="font-size: 30px; font-weight: 600">248</div>
+<div style="font-size: 13px; color: #5A5F6B">3 agents per run</div>
+</div>
+<div style="background: #FFFFFF; border: 1px solid #F0B877; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 6px">
+<div style="font-size: 13px; color: #5A5F6B">Built on replaced evidence</div>
+<div style="font-size: 30px; font-weight: 600; color: #9A4B05">7</div>
+<div style="font-size: 13px; color: #5A5F6B">EDD Policy v3 → v4 on 1 Jul 2026</div>
+</div>
+<div style="background: #FFFFFF; border: 1px solid #E3E4E8; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 6px">
+<div style="font-size: 13px; color: #5A5F6B">Claims without support</div>
+<div style="font-size: 30px; font-weight: 600; color: #B42318">12</div>
+<div style="font-size: 13px; color: #5A5F6B">across 9 runs</div>
+</div>
+<div style="background: #FFFFFF; border: 1px solid #E3E4E8; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 6px">
+<div style="font-size: 13px; color: #5A5F6B">Stale chunks blocked</div>
+<div style="font-size: 30px; font-weight: 600; color: #1E7A4C">0</div>
+<div style="font-size: 13px; color: #5A5F6B">Guard mode is off</div>
+</div>
+</section>
+
+<section aria-label="Runs" style="background: #FFFFFF; border: 1px solid #E3E4E8; border-radius: 12px; overflow: hidden">
+<div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 20px; border-bottom: 1px solid #E3E4E8">
+<h2 style="margin: 0; font-size: 16px; font-weight: 600">Recent runs</h2>
+<div style="display: flex; flex-wrap: wrap; gap: 16px; font-size: 13px; color: #5A5F6B">
+<span style="display: flex; align-items: center; gap: 6px"><span style="width: 10px; height: 10px; border-radius: 3px; background: #1E7A4C"></span>Current evidence</span>
+<span style="display: flex; align-items: center; gap: 6px"><span style="width: 10px; height: 10px; border-radius: 3px; background: #D97A0B"></span>Replaced evidence</span>
+<span style="display: flex; align-items: center; gap: 6px"><span style="width: 10px; height: 10px; border-radius: 3px; background: #B42318"></span>Not supported</span>
+</div>
+</div>
+<div style="overflow-x: auto">
+<table style="width: 100%; min-width: 860px; border-collapse: collapse; font-size: 14px">
+<thead>
+<tr style="text-align: left; color: #5A5F6B; font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em">
+<th scope="col" style="padding: 12px 20px; font-weight: 600">Run</th>
+<th scope="col" style="padding: 12px 20px; font-weight: 600">Customer</th>
+<th scope="col" style="padding: 12px 20px; font-weight: 600">Decision</th>
+<th scope="col" style="padding: 12px 20px; font-weight: 600">Claims</th>
+<th scope="col" style="padding: 12px 20px; font-weight: 600">Finding</th>
+<th scope="col" style="padding: 12px 20px; font-weight: 600">Started</th>
+</tr>
+</thead>
+<tbody>
+<tr style="border-top: 1px solid #E3E4E8; background: #FFF8EF">
+<td style="padding: 16px 20px"><a href="Answer.dc.html" style="font-family: 'IBM Plex Mono', monospace; font-weight: 500">KYC-2041</a></td>
+<td style="padding: 16px 20px">Meridian Ledger LLC<div style="font-size: 12px; color: #5A5F6B">Digital asset custody</div></td>
+<td style="padding: 16px 20px">Auto-approved</td>
+<td style="padding: 16px 20px"><span style="display: inline-flex; gap: 4px; font-family: 'IBM Plex Mono', monospace; font-size: 13px"><span style="padding: 2px 8px; border-radius: 6px; background: #E7F4EC; color: #1E7A4C">2</span><span style="padding: 2px 8px; border-radius: 6px; background: #FDF1E3; color: #9A4B05">2</span><span style="padding: 2px 8px; border-radius: 6px; background: #FDECEA; color: #B42318">1</span></span></td>
+<td style="padding: 16px 20px"><span style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; background: #FDF1E3; color: #9A4B05; font-size: 13px; font-weight: 600"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M7 1.5l6 11H1l6-11z" stroke="#9A4B05" stroke-width="1.4" stroke-linejoin="round"></path><path d="M7 6v3" stroke="#9A4B05" stroke-width="1.4" stroke-linecap="round"></path></svg>Decision used replaced policy</span></td>
+<td style="padding: 16px 20px; color: #5A5F6B">Today, 10:42</td>
+</tr>
+<tr style="border-top: 1px solid #E3E4E8">
+<td style="padding: 16px 20px"><a href="Answer.dc.html" style="font-family: 'IBM Plex Mono', monospace; font-weight: 500">KYC-2040</a></td>
+<td style="padding: 16px 20px">Bluefin Logistics Inc.<div style="font-size: 12px; color: #5A5F6B">Freight forwarding</div></td>
+<td style="padding: 16px 20px">Approved</td>
+<td style="padding: 16px 20px"><span style="display: inline-flex; gap: 4px; font-family: 'IBM Plex Mono', monospace; font-size: 13px"><span style="padding: 2px 8px; border-radius: 6px; background: #E7F4EC; color: #1E7A4C">5</span><span style="padding: 2px 8px; border-radius: 6px; background: #F1F2F4; color: #5A5F6B">0</span><span style="padding: 2px 8px; border-radius: 6px; background: #F1F2F4; color: #5A5F6B">0</span></span></td>
+<td style="padding: 16px 20px"><span style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; background: #E7F4EC; color: #1E7A4C; font-size: 13px; font-weight: 600"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M3 7.5l2.5 2.5L11 4" stroke="#1E7A4C" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>All evidence current</span></td>
+<td style="padding: 16px 20px; color: #5A5F6B">Today, 10:15</td>
+</tr>
+<tr style="border-top: 1px solid #E3E4E8">
+<td style="padding: 16px 20px"><a href="Answer.dc.html" style="font-family: 'IBM Plex Mono', monospace; font-weight: 500">KYC-2039</a></td>
+<td style="padding: 16px 20px">Okafor &amp; Reyes Dental<div style="font-size: 12px; color: #5A5F6B">Healthcare practice</div></td>
+<td style="padding: 16px 20px">Escalated to EDD</td>
+<td style="padding: 16px 20px"><span style="display: inline-flex; gap: 4px; font-family: 'IBM Plex Mono', monospace; font-size: 13px"><span style="padding: 2px 8px; border-radius: 6px; background: #E7F4EC; color: #1E7A4C">4</span><span style="padding: 2px 8px; border-radius: 6px; background: #F1F2F4; color: #5A5F6B">0</span><span style="padding: 2px 8px; border-radius: 6px; background: #FDECEA; color: #B42318">1</span></span></td>
+<td style="padding: 16px 20px"><span style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; background: #FDECEA; color: #B42318; font-size: 13px; font-weight: 600"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><circle cx="7" cy="7" r="5.5" stroke="#B42318" stroke-width="1.4"></circle><path d="M7 4v3.5M7 9.6v.1" stroke="#B42318" stroke-width="1.4" stroke-linecap="round"></path></svg>1 claim without a source</span></td>
+<td style="padding: 16px 20px; color: #5A5F6B">Today, 09:58</td>
+</tr>
+<tr style="border-top: 1px solid #E3E4E8; background: #FFF8EF">
+<td style="padding: 16px 20px"><a href="Answer.dc.html" style="font-family: 'IBM Plex Mono', monospace; font-weight: 500">KYC-2036</a></td>
+<td style="padding: 16px 20px">Tidewater Coin Exchange<div style="font-size: 12px; color: #5A5F6B">Virtual asset exchange</div></td>
+<td style="padding: 16px 20px">Auto-approved</td>
+<td style="padding: 16px 20px"><span style="display: inline-flex; gap: 4px; font-family: 'IBM Plex Mono', monospace; font-size: 13px"><span style="padding: 2px 8px; border-radius: 6px; background: #E7F4EC; color: #1E7A4C">3</span><span style="padding: 2px 8px; border-radius: 6px; background: #FDF1E3; color: #9A4B05">2</span><span style="padding: 2px 8px; border-radius: 6px; background: #F1F2F4; color: #5A5F6B">0</span></span></td>
+<td style="padding: 16px 20px"><span style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; background: #FDF1E3; color: #9A4B05; font-size: 13px; font-weight: 600"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M7 1.5l6 11H1l6-11z" stroke="#9A4B05" stroke-width="1.4" stroke-linejoin="round"></path><path d="M7 6v3" stroke="#9A4B05" stroke-width="1.4" stroke-linecap="round"></path></svg>Decision used replaced policy</span></td>
+<td style="padding: 16px 20px; color: #5A5F6B">Yesterday, 16:20</td>
+</tr>
+<tr style="border-top: 1px solid #E3E4E8">
+<td style="padding: 16px 20px"><a href="Answer.dc.html" style="font-family: 'IBM Plex Mono', monospace; font-weight: 500">KYC-2033</a></td>
+<td style="padding: 16px 20px">Granite Peak Builders<div style="font-size: 12px; color: #5A5F6B">Construction</div></td>
+<td style="padding: 16px 20px">Approved</td>
+<td style="padding: 16px 20px"><span style="display: inline-flex; gap: 4px; font-family: 'IBM Plex Mono', monospace; font-size: 13px"><span style="padding: 2px 8px; border-radius: 6px; background: #E7F4EC; color: #1E7A4C">5</span><span style="padding: 2px 8px; border-radius: 6px; background: #F1F2F4; color: #5A5F6B">0</span><span style="padding: 2px 8px; border-radius: 6px; background: #F1F2F4; color: #5A5F6B">0</span></span></td>
+<td style="padding: 16px 20px"><span style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; background: #E7F4EC; color: #1E7A4C; font-size: 13px; font-weight: 600"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M3 7.5l2.5 2.5L11 4" stroke="#1E7A4C" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>All evidence current</span></td>
+<td style="padding: 16px 20px; color: #5A5F6B">Yesterday, 14:02</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<p style="margin: 0; font-size: 13px; color: #5A5F6B">Synthetic data. Every row is a traced multi-agent run ingested from OpenTelemetry spans. Select a run to see why the agents decided what they did.</p>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":960}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

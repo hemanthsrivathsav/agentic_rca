@@ -1,0 +1,51 @@
+{
+  "chunks": [
+    {
+      "id": "edd-policy@v3#2.1",
+      "doc_id": "edd-policy",
+      "title": "EDD Policy",
+      "section": "2.1",
+      "version": 3,
+      "effective_on": "2026-01-01",
+      "retired_on": "2026-07-01",
+      "owner": "Financial Crimes Compliance",
+      "text": "Enhanced due diligence escalation list. Escalate to EDD: money services businesses, casinos and dealers in precious metals. Business types not on this escalation list follow standard onboarding."
+    },
+    {
+      "id": "edd-policy@v4#2.1",
+      "doc_id": "edd-policy",
+      "title": "EDD Policy",
+      "section": "2.1",
+      "version": 4,
+      "effective_on": "2026-07-01",
+      "retired_on": null,
+      "owner": "Financial Crimes Compliance",
+      "text": "Amended July 2026. Escalate to EDD: money services businesses, casinos, dealers in precious metals and virtual asset service providers, including custody and exchange businesses."
+    },
+    {
+      "id": "risk-guide@v2#1",
+      "doc_id": "risk-guide",
+      "title": "Risk Rating Guide",
+      "section": "1",
+      "version": 2,
+      "effective_on": "2025-10-01",
+      "retired_on": null,
+      "owner": "Enterprise Risk",
+      "text": "Score customer risk from 0 to 100. Bands: 0 to 39 low, 40 to 69 medium, 70 to 100 high. Business types on the EDD escalation list score at least 70."
+    },
+    {
+      "id": "kyc-procedure@v5#3",
+      "doc_id": "kyc-procedure",
+      "title": "KYC Procedure",
+      "section": "3",
+      "version": 5,
+      "effective_on": "2026-02-01",
+      "retired_on": null,
+      "owner": "Operations",
+      "text": "Standard onboarding: verify registration documents against the state business registry and screen every beneficial owner against sanctions lists."
+    }
+  ],
+  "supersedes": [
+    {"new": "edd-policy@v4#2.1", "old": "edd-policy@v3#2.1"}
+  ]
+}
