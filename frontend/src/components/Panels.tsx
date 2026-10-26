@@ -33,7 +33,7 @@ export function AnalystRead({ report }: { report: Report }) {
   );
 }
 
-export function NodeDetail({ report, id }: { report: Report; id: string | null }) {
+export function NodeDetail({ report, id, onProve }: { report: Report; id: string | null; onProve?: (id: string) => void }) {
   if (!id) {
     return (
       <section className="card pad" aria-label="Selected item">
@@ -121,6 +121,12 @@ export function NodeDetail({ report, id }: { report: Report; id: string | null }
           <strong>{claim?.agent ?? ev?.agent ?? "—"}</strong>
         </div>
       </div>
+      {claim?.proof && onProve && (
+        <button type="button" className="btn btn-dark prove-btn" onClick={() => onProve(claim.id)}>
+          Prove it
+          <span className="prove-sub">{claim.proof.reruns} re-runs</span>
+        </button>
+      )}
     </section>
   );
 }

@@ -169,13 +169,22 @@ SQLite tables (first cut): `runs` (id, workflow, subject, status, parent_run_id,
 - Exact list of approved Python/npm packages.
 - Hackathon date and judges' profile (engineers vs product).
 
+## USP and "Prove it" (26 Oct 2026)
+
+One line for judges: **"MLflow tells you why your agent crashed. Supersede proves why your agent was wrong when nothing crashed."** Full pitch notes, demo order and judge Q&A: `docs/PITCH.md`.
+
+- Tracing tools (MLflow, LangSmith, Langfuse) find failures that announce themselves (an errored span). MLflow's assistant is an LLM reading an errored trace. Supersede finds silent failures in *successful* runs and **proves** the cause by experiment.
+- **Prove it** makes the proof visible. Every claim carries `proof` in the report: `rows` (baseline, one `hide` row per leave-one-out or pair experiment, and a `swap` row from the automatic replay), `reruns`, `model_calls`, `verdict`, `proven`, `cause_confirmed`. The Analyzer keeps each re-run's result instead of discarding it (`_experiment`), so this costs no extra model calls.
+- UI: "Prove this decision" button in the canvas header, "Prove it" on every claim's detail card, opening `components/ProofDialog.tsx` (experiment table, collapsed "no change" rows when there are many, verdict box).
+- `REPORT_VERSION` is 3, so cached analyses from before are rebuilt.
+
 ## Current status (25 Oct 2026)
 
 Build order steps 1 to 6 and 8 are done; step 7 (Azure client) is written but untested until access is approved. See README.md for how to run.
 
 - **Engine** (`backend/supersede/`, standard library only): `store.py`, `knowledge.py`, `llm.py` (MockLLMClient + AzureOpenAIClient over urllib), `tracing.py`, `runtime.py` (StepContext, Runner.start/resume/fork/rerun_step), `rules.py` (stale_evidence, tool_loop, ungrounded_before_action, budget), `provenance.py` (Analyzer), `service.py` (facade used by both APIs), `demo/kyc.py` + `demo/data/*.json`.
 - **APIs**: `backend/api/app.py` (FastAPI) and `backend/api/stdlib_server.py` (same routes, no dependencies). Routes are listed in `backend/README.md`.
-- **Tests**: `backend/tests/test_engine.py`, 22 tests, all passing (`python -m unittest discover -s tests`).
+- **Tests**: `backend/tests/test_engine.py`, 24 tests (22 + 2 for Prove it), all passing (`python -m unittest discover -s tests`).
 - **Frontend** (`frontend/src/`): Overview and Decision pages per design v2. Runs on the laptop against the FastAPI app (`python -m uvicorn`), `npm run typecheck` passes. Checked in headless Edge at 2560 and 1440 px wide: graph layout, Play with simulated breakpoint, fork animating in place, branches.
 - **Rebuild spec**: `docs/REBUILD_SPEC.md` describes every file in enough detail to recreate the project, with expected demo results. Keep it in sync when behaviour changes.
 - Dev machine: Smart App Control blocks unsigned `.exe` launchers, so always run `python -m pip`, `python -m uvicorn`, `python -m unittest`. Install packages into the main Python, not a venv.

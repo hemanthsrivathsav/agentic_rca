@@ -335,3 +335,29 @@ g.is-hidden { opacity: 0.04; }
   .edge-flow, .pause-banner, .edges g { animation: none; }
   .edge, .node, .node-wrap, .stack-bar span, .step-bar { transition: none; }
 }
+
+/* ---------- "Prove it" ---------- */
+.btn-prove { background: var(--bad); color: #fff; border: 0; gap: 8px; }
+.btn-prove:hover { background: #ff7f6c; }
+.prove-btn { width: 100%; gap: 8px; }
+.prove-sub { font-size: 12px; font-weight: 500; opacity: 0.8; }
+.center-dialog { justify-content: center; align-items: center; padding: 24px; }
+.proof { width: min(860px, 100%); max-height: calc(100vh - 48px); overflow-y: auto; background: var(--surface); border-radius: 16px; padding: 24px; box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.45); }
+.proof > * + * { margin-top: 16px; }
+.proof-title { font-size: 22px; line-height: 1.3; margin-top: 4px; color: var(--ink); }
+.proof-table td { vertical-align: top; }
+.proof-table tr.proof-baseline td { background: var(--ground); }
+.proof-table tr.is-changed td { background: #fff8f6; }
+.proof-table tr.proof-swap.is-changed td { background: #f2fbf8; }
+.result-chip { display: inline-block; padding: 3px 9px; border-radius: 999px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+.result-chip.bad { background: var(--bad-bg); color: var(--bad-ink); }
+.result-chip.good { background: var(--good-bg); color: var(--good-ink); }
+.result-chip.quiet { background: var(--ground); color: var(--muted); }
+.verdict { padding: 16px 18px; border-radius: 12px; border: 1px solid var(--line); }
+.verdict p { margin: 6px 0 0; font-family: var(--serif); font-size: 16px; line-height: 1.55; }
+.verdict-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; font-weight: 700; }
+.verdict.confirmed { border-color: var(--good-ink); background: var(--good-bg); }
+.verdict.confirmed .verdict-head { color: var(--good-ink); }
+.verdict.proven { border-color: var(--ink); }
+.verdict.unproven { border-color: #e3b04b; background: var(--warn-bg); }
+.verdict.unproven .verdict-head { color: var(--warn-ink); }

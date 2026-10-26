@@ -794,7 +794,7 @@ The package docstring lists the layers `store`, `knowledge`, `llm`, `tracing`, `
 - `backend/README.md` holds a short run book and the API table in section 8. Its run book should use `python -m uvicorn api.app:app --reload`.
 - The root `README.md` holds run steps, the 3-minute demo script, a "How it works" table (one row per module) and Azure env-var setup.
 
-### 7.14 `tests/test_engine.py` (22 tests, `unittest`)
+### 7.14 `tests/test_engine.py` (24 tests, `unittest`; the 2 "Prove it" tests are described in section 15)
 
 The test module starts with:
 - `V3, V4 = "edd-policy@v3#2.1", "edd-policy@v4#2.1"`;
@@ -1531,7 +1531,7 @@ Use these to check a rebuild beyond the unit tests. Durations and token counts c
 2. **Model and tracing:** `llm.py` and `tracing.py`.
 3. **Runtime:** `runtime.py`. Then `demo/kyc.py`, with the workflow and the mock script.
 4. **Rules:** `rules.py`. Check: the `BreakpointTests` that only use the runner (tool loop, budget).
-5. **Analysis:** `provenance.py`, then `service.py`. Check: all 22 tests pass, and the section 12 values match.
+5. **Analysis:** `provenance.py`, then `service.py`. Check: all 24 tests pass, and the section 12 values match.
 6. **APIs:** `api/app.py` and `api/stdlib_server.py`. Check: `GET /api/overview` matches section 12.
 7. **Frontend foundations:** config files, `types.ts`, `api.ts`, `format.ts`, `router.ts`, `layout.ts` and `styles.css`.
 8. **Frontend screens:** `Header`, `EvidenceGraph`, `Panels`, `StateDrawer`, `Overview`, `Decision`, `App` and `main`. Check: `npm run typecheck` passes. Then walk through the README's demo script against the running backend:
@@ -1573,3 +1573,32 @@ Keep these unless you also change the dependent code and tests.
 10. **The Header link is hard-coded.** "Decision graph" always points at `#/runs/KYC-2041`.
 11. **`api.fork` never sends `guard`.** The frontend doesn't use guard mode; it is only reachable through the API and the tests.
 12. **No duplicate forks.** React StrictMode runs `load()` twice in dev, and two tabs can ask for the same report at once. The service lock and fork reuse together keep a run at one replay and one fork per distinct (step, options).
+
+---
+
+## 15. "Prove it" (added 26 Oct 2026)
+
+The feature that shows the experiments behind every claim. It adds no model calls: the Analyzer keeps the result of each re-run it already does for attribution.
+
+**Backend (`provenance.py`)**
+
+- `REPORT_VERSION = 3`.
+- `_experiment(run, claim, exclude) -> {"hidden": sorted(exclude), "text", "value", "change"}` replaces `_change`. It re-runs the claim's step with `exclude` hidden; `change` is 1.0 when the claim disappears or a decision's value changes, else `round(1 - similarity(original, new), 4)`.
+- `attribute()` appends every experiment (single inputs, and pairs when the pair fallback runs) to `experiments` and returns it with `change`, `share`, `drove`.
+- `proof(run, claim, experiments, drove, evidence, replay, claims) -> {"rows", "reruns", "model_calls", "verdict", "proven", "cause_confirmed"}`:
+  - rows: one `baseline` row (`label` "As the agents ran it"), one `hide` row per experiment (`label` "Hide " + names joined by " and ", `hidden`, `changed` = change >= `MIN_CHANGE`), and a `swap` row when the automatic replay has this claim (`label` "Swap in <current labels> (replay from step N)", `changed` = the replay diff changed it, or for the decision, `decision_changed`).
+  - `reruns` = number of experiments (+1 for the swap); `model_calls` = reruns x chat spans in the claim's step, plus the replay run's non-cached chat spans.
+  - verdict: no inputs -> "Nothing in the agent's context could have produced this {claim|decision}. It came from the model's own knowledge, so no evidence can prove or disprove it." (`proven` false). No drivers -> "Hiding the inputs, one at a time and in pairs, never changes this ...". Drivers that only matter together (no single hide changed it) -> "Hiding A and B together changes this ...; hiding either one alone does not, because each is enough on its own." Otherwise "Hiding A or hiding B changes this ...; hiding anything else does not." Then the replaced chain ("Claim 04 rests on claim 03, which rests on EDD Policy v3 §2.1 (retired 1 Jul 2026).") and, with a swap row, either "Swapping in the current version changes it to “...”, so the replaced source is the cause." (`cause_confirmed` true) or "... leaves it unchanged, so the replaced source did not matter here."
+- `analyze()` sets `claims[cid]["proof"]` after the replay is computed, before building the report.
+
+**Expected (KYC-2041, mock model):** decision proof has 7 rows (baseline, hide c1..c5, swap), only "Hide claim 04" and the swap changed, `reruns` 6, `model_calls` 9, `proven` and `cause_confirmed` true. Claim 05: 1 swap row, not proven. Replay run's decision: only "Hide claim 03 and claim 04" changed; verdict contains "together".
+
+**Tests:** `test_prove_it_decision`, `test_prove_it_unsourced_and_redundant` (in `RunTests`).
+
+**Frontend**
+
+- `types.ts`: `Claim.proof: Proof`; `ProofRow`, `Proof` interfaces.
+- `components/ProofDialog.tsx`: centred dialog (Escape or backdrop closes). Title is the decision word or claim text in serif. Table "Experiment / What the agent said / Result"; result chips "Baseline", "No change", "Changed: it mattered" (hide), "Decision flips" / "Changes" (swap). When more than 4 hide rows changed nothing, they collapse behind "Show N experiments that changed nothing". Verdict box: "Cause confirmed" (green), "Drivers proven" (ink border) or "Cannot be proven from evidence" (amber), with "N re-runs, M model calls".
+- `Decision.tsx`: state `proofId`; a coral "Prove this decision" button (with "N re-runs") first in `.canvas-controls` when the shown report has a decision proof; `NodeDetail` gets `onProve`, rendering a full-width "Prove it" button under the facts for claims.
+- `styles.css`: `.btn-prove`, `.prove-btn`, `.prove-sub`, `.center-dialog`, `.proof`, `.proof-title`, `.proof-table` row tints, `.result-chip` (bad/good/quiet), `.verdict` (confirmed/proven/unproven).
+

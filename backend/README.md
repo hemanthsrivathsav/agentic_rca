@@ -32,7 +32,7 @@ Analyses are cached in the database. A cached report is rebuilt when the run's s
 | GET | `/api/overview` | Totals, runs ranked by exposure, recently replaced sources |
 | GET | `/api/runs` | Run summaries (top-level runs; `?include_forks=true` for all) |
 | POST | `/api/runs` | Start a run: `{"customer_id": "KYC-2041", "options": {"breakpoints": true}}` |
-| GET | `/api/runs/{id}` | Full report: claims, attribution, evidence status, decision path, replay, stability, steps, graph, events, forks (`?refresh=true` re-analyses) |
+| GET | `/api/runs/{id}` | Full report: claims (each with a `proof`: the experiments behind it and a verdict), attribution, evidence status, decision path, replay, stability, steps, graph, events, forks (`?refresh=true` re-analyses) |
 | GET | `/api/runs/{id}/steps/{n}/state` | State after step n, what changed, and the spans of that step |
 | POST | `/api/runs/{id}/resume` | Act on a paused run: `{"action": "approve" \| "edit" \| "reject", "swaps": {...}}` |
 | POST | `/api/runs/{id}/fork` | Re-run from a step with edited evidence: `{"from_step": 3, "swaps": {"old-chunk": "new-chunk"}, "guard": false}`. If the run already has a fork from that step with the same settings, that fork is returned instead of a copy |

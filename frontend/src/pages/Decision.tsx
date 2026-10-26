@@ -3,6 +3,7 @@ import { api } from "../api";
 import EvidenceGraph, { type GraphFilters } from "../components/EvidenceGraph";
 import { AnalystRead, FeedbackCard, NodeDetail, StabilityCard } from "../components/Panels";
 import StateDrawer from "../components/StateDrawer";
+import ProofDialog from "../components/ProofDialog";
 import { claimName, day, decisionWord, pct, runStatusWord, statusWord } from "../format";
 import { go, runPath } from "../router";
 import type { Report } from "../types";
@@ -27,6 +28,7 @@ export default function Decision({ runId }: { runId: string }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const timer = useRef<number | null>(null);
+  const [proofId, setProofId] = useState<string | null>(null);
   // set when a report for the next run is already in hand (after a fork or resume)
   const preloaded = useRef<string | null>(null);
 
@@ -257,6 +259,12 @@ export default function Decision({ runId }: { runId: string }) {
               <p>{subhead}</p>
             </div>
             <div className="canvas-controls">
+              {shown.claims.decision?.proof && (
+                <button type="button" className="btn btn-prove" onClick={() => setProofId("decision")}>
+                  Prove this decision
+                  <span className="prove-sub">{shown.claims.decision.proof.reruns} re-runs</span>
+                </button>
+              )}
               {report.replay && (
                 <div className="seg" role="group" aria-label="Evidence shown">
                   <button type="button" aria-pressed={mode === "run"} onClick={() => { stop(); setMode("run"); setVisibleStep(report.last_step); }}>
@@ -394,10 +402,16 @@ export default function Decision({ runId }: { runId: string }) {
 
       <aside className="rail-right stack-16" aria-label="Explanation">
         <AnalystRead report={realPause ? report : shown} />
-        <NodeDetail report={shown} id={selected && (shown.claims[selected] || shown.graph.nodes.some((n) => n.id === selected)) ? selected : null} />
+        <NodeDetail
+          report={shown}
+          id={selected && (shown.claims[selected] || shown.graph.nodes.some((n) => n.id === selected)) ? selected : null}
+          onProve={setProofId}
+        />
         <StabilityCard report={shown} />
         {shown.decision && <FeedbackCard key={shown.run.id} report={shown} />}
       </aside>
+
+      {proofId && shown.claims[proofId]?.proof && <ProofDialog claim={shown.claims[proofId]} onClose={() => setProofId(null)} />}
 
       {drawerStep !== null && (
         <StateDrawer

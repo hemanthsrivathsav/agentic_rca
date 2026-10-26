@@ -48,13 +48,16 @@ python -m unittest discover -s tests -v
 
 ## Demo script (about 3 minutes)
 
+Pitch notes, the one-line answer to "how is this different from MLflow?" and likely judge questions: `docs/PITCH.md`.
+
 1. **Runs page.** "1 decision rests on a retired policy." KYC-2041 is ranked first. Every run was marked successful by normal tracing.
 2. **Open the worst case (KYC-2041).** The coral path runs from EDD Policy v3 (retired 106 days earlier) through claim 03 and claim 04 to "Approve account". Each piece of evidence sits level with the claim it fed, and v4 (in force, never retrieved) sits just under v3. Click nodes to see what drove each claim, measured by removing inputs one at a time.
-3. **Press Play.** The run rebuilds step by step and stops at step 3: "With breakpoints on, this run would pause at step 3."
-4. **Fork with v4 §2.1 and continue.** Nothing reloads: the toggle moves to "With current versions", the evidence re-points from v3 to v4 (v3 stays, dimmed and marked "swapped out"), the flow turns teal, and steps 4 to 6 play on until the outcome becomes "Escalate to EDD". This is the automatic replay (steps 1 and 2 reused), which the page already has. The decision-stability card goes from 6 approve / 4 escalate to 10 of 10 escalate.
-5. **Toggle back to "As the agents ran it"** to compare the two on the same layout.
-6. **Inspect state at step 3.** The drawer shows exactly what entered the agent's context, the claims made, and the calls with time and tokens.
-7. **Open KYC-2036 (paused).** A live breakpoint. "Swap in the current version" forks the run with v4 and plays on in place. It pauses again before the irreversible decision because claim 05 has no source. "Approve and continue" finishes with an escalation.
+3. **Prove this decision.** The experiment table: hiding claim 04 changes the approval, hiding anything else does not, and swapping in EDD Policy v4 flips it to "Escalate to EDD". Verdict: cause confirmed, 6 re-runs, 9 model calls. Every row is a re-run that actually happened, not a model explaining itself. "Prove it" works on every claim (try claim 05: it cannot be proven, because it came from the model's own knowledge).
+4. **Press Play.** The run rebuilds step by step and stops at step 3: "With breakpoints on, this run would pause at step 3."
+5. **Fork with v4 §2.1 and continue.** Nothing reloads: the toggle moves to "With current versions", the evidence re-points from v3 to v4 (v3 stays, dimmed and marked "swapped out"), the flow turns teal, and steps 4 to 6 play on until the outcome becomes "Escalate to EDD". This is the automatic replay (steps 1 and 2 reused), which the page already has. The decision-stability card goes from 6 approve / 4 escalate to 10 of 10 escalate.
+6. **Toggle back to "As the agents ran it"** to compare the two on the same layout.
+7. **Inspect state at step 3.** The drawer shows exactly what entered the agent's context, the claims made, and the calls with time and tokens.
+8. **Open KYC-2036 (paused).** A live breakpoint. "Swap in the current version" forks the run with v4 and plays on in place. It pauses again before the irreversible decision because claim 05 has no source. "Approve and continue" finishes with an escalation.
 
 Forking the same run the same way twice (same step, same swap) opens the existing fork instead of making a copy, so the Branches row under the canvas stays short.
 

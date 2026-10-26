@@ -108,6 +108,27 @@ export interface Claim {
   replaced_via: string[];
   attribution: Attribution[];
   main_source: string | null;
+  proof: Proof;
+}
+
+/** "Prove it": the re-runs behind a claim. Every row actually ran. */
+export interface ProofRow {
+  kind: "baseline" | "hide" | "swap";
+  label: string;
+  hidden?: string[];
+  text: string;
+  value: string | number | null;
+  changed: boolean;
+  change: number;
+}
+
+export interface Proof {
+  rows: ProofRow[];
+  reruns: number;
+  model_calls: number;
+  verdict: string;
+  proven: boolean;
+  cause_confirmed: boolean;
 }
 
 export interface GraphNode {

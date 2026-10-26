@@ -96,6 +96,30 @@ class RunTests(unittest.TestCase):
         self.assertEqual(g["columns"][0], "Evidence")
         self.assertEqual(g["columns"][-1], "Outcome")
 
+    def test_prove_it_decision(self):
+        # "Prove it": every row is a re-run that actually happened
+        proof = self.s.report("KYC-2041")["claims"]["decision"]["proof"]
+        self.assertTrue(proof["proven"])
+        self.assertTrue(proof["cause_confirmed"])
+        kinds = [r["kind"] for r in proof["rows"]]
+        self.assertEqual(kinds[0], "baseline")
+        self.assertEqual(kinds[-1], "swap")
+        hide_c4 = next(r for r in proof["rows"] if r.get("hidden") == ["c4"])
+        self.assertTrue(hide_c4["changed"])
+        self.assertTrue(all(not r["changed"] for r in proof["rows"] if r.get("hidden") in (["c1"], ["c2"], ["c5"])))
+        self.assertEqual(proof["rows"][-1]["value"], "escalate")
+        self.assertIn("EDD Policy v3 §2.1", proof["verdict"])
+        self.assertEqual(proof["reruns"], len(proof["rows"]) - 1)
+
+    def test_prove_it_unsourced_and_redundant(self):
+        rep = self.s.report("KYC-2041")
+        c5 = rep["claims"]["c5"]["proof"]
+        self.assertFalse(c5["proven"])
+        self.assertIn("model's own knowledge", c5["verdict"])
+        replay = self.s.report(rep["replay"]["run_id"])["claims"]["decision"]["proof"]
+        self.assertIn("together", replay["verdict"])
+        self.assertTrue(any(r.get("hidden") == ["c3", "c4"] and r["changed"] for r in replay["rows"]))
+
     def test_replay_graph_keeps_swapped_out_version(self):
         # the run and its replay draw the same nodes, so the UI can animate between them
         rep = self.s.report("KYC-2041")

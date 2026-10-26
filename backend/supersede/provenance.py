@@ -27,7 +27,7 @@ from .util import now_iso, parse_day, similarity
 DROVE_SHARE = 0.2     # an input "drove" a claim if it explains >= 20% of the change
 MIN_CHANGE = 0.05     # ...and hiding it changed the claim by at least 5%
 REPLAY_REASON = "replay with current versions"
-REPORT_VERSION = 2    # bump when the report shape changes, so cached analyses are rebuilt
+REPORT_VERSION = 3    # bump when the report shape changes, so cached analyses are rebuilt
 
 FINDINGS = {
     "healthy": "All evidence current",
@@ -85,8 +85,11 @@ class Analyzer:
         result: dict[str, dict] = {}
         for cid, claim in state["claims"].items():
             raw: dict[str, float] = {}
+            experiments: list[dict] = []   # every re-run, kept as proof
             for inp in claim["inputs"]:
-                raw[inp] = self._change(run, claim, {inp})
+                exp = self._experiment(run, claim, {inp})
+                experiments.append(exp)
+                raw[inp] = exp["change"]
             total = sum(raw.values())
             # Redundant causes: if no single input matters but the claim has
             # several, two inputs may each be enough on their own. Remove pairs
@@ -95,25 +98,104 @@ class Analyzer:
                 ins = claim["inputs"]
                 for i in range(len(ins)):
                     for j in range(i + 1, len(ins)):
-                        ch = self._change(run, claim, {ins[i], ins[j]})
-                        raw[ins[i]] += ch / 2
-                        raw[ins[j]] += ch / 2
+                        exp = self._experiment(run, claim, {ins[i], ins[j]})
+                        experiments.append(exp)
+                        raw[ins[i]] += exp["change"] / 2
+                        raw[ins[j]] += exp["change"] / 2
                 raw = {k: round(v, 4) for k, v in raw.items()}
                 total = sum(raw.values())
             shares = {k: (round(v / total, 3) if total > 0 else 0.0) for k, v in raw.items()}
             drove = [k for k in raw if shares[k] >= DROVE_SHARE and raw[k] >= MIN_CHANGE]
-            result[cid] = {"change": raw, "share": shares, "drove": drove}
+            result[cid] = {"change": raw, "share": shares, "drove": drove, "experiments": experiments}
         return result
 
-    def _change(self, run: dict, claim: dict, exclude: set[str]) -> float:
-        """How much the claim changes when ``exclude`` is hidden (0..1)."""
+    def _experiment(self, run: dict, claim: dict, exclude: set[str]) -> dict:
+        """Re-run the claim's step with ``exclude`` hidden and record what came out.
+
+        ``change`` is 0..1: how different the claim is from the original."""
         alt = self.runner.rerun_step(run, claim["step"], exclude=exclude)
         alt_claim = alt["claims"].get(claim["id"])
         if alt_claim is None:
-            return 1.0
-        if claim["kind"] == "decision" and alt_claim.get("value") != claim.get("value"):
-            return 1.0
-        return round(1.0 - similarity(claim["text"], alt_claim["text"]), 4)
+            change, text, value = 1.0, None, None
+        else:
+            text, value = alt_claim["text"], alt_claim.get("value")
+            if claim["kind"] == "decision" and value != claim.get("value"):
+                change = 1.0
+            else:
+                change = round(1.0 - similarity(claim["text"], text), 4)
+        return {"hidden": sorted(exclude), "text": text, "value": value, "change": change}
+
+    # -- "Prove it" ----------------------------------------------------
+    def _label(self, node_id: str, evidence: dict) -> str:
+        return evidence[node_id]["label"] if node_id in evidence else self._name(node_id)
+
+    def proof(self, run: dict, claim: dict, experiments: list[dict], drove: list[str], evidence: dict, replay: dict | None, claims: dict | None = None) -> dict:
+        """The experiments behind a claim, as a table, plus a one-line verdict.
+
+        Unlike a model's explanation of a trace, every row here is a re-run
+        that actually happened: hide an input (or swap in the current version
+        of a source), run the step again, compare."""
+        spans = self.store.spans(run["id"])
+        calls_per_rerun = max(1, sum(1 for s in spans if s["step"] == claim["step"] and s["kind"] == "chat"))
+        what = "decision" if claim["kind"] == "decision" else "claim"
+        rows = [{"kind": "baseline", "label": "As the agents ran it", "text": claim["text"], "value": claim.get("value"), "changed": False, "change": 0.0}]
+        for e in experiments:
+            names = [self._label(h, evidence) for h in e["hidden"]]
+            rows.append({"kind": "hide", "label": "Hide " + " and ".join(names), "hidden": e["hidden"],
+                         "text": e["text"] if e["text"] is not None else f"(no {what} made)", "value": e["value"],
+                         "changed": e["change"] >= MIN_CHANGE, "change": e["change"]})
+        reruns = len(experiments)
+        calls = reruns * calls_per_rerun
+
+        swap_row = None
+        if replay:
+            after = next((c for c in replay["claims"] if c["id"] == claim["id"]), None)
+            if after and after["after"] is not None:
+                current = [self.kb.get(new).label for new in replay["swaps"].values() if new in self.kb.chunks]
+                changed = after["changed"] or (claim["kind"] == "decision" and replay["decision_changed"])
+                swap_row = {"kind": "swap", "label": "Swap in " + " and ".join(current) + f" (replay from step {replay['from_step']})",
+                            "text": after["after"], "value": replay["decision_after"] if claim["kind"] == "decision" else None,
+                            "changed": changed, "change": 1.0 if changed else 0.0}
+                rows.append(swap_row)
+                reruns += 1
+                calls += sum(1 for s in self.store.spans(replay["run_id"]) if s["kind"] == "chat" and not s["cached"])
+
+        hidden_ok = [r for r in rows if r["kind"] == "hide" and not r["changed"]]
+        drivers = [self._label(d, evidence) for d in drove]
+        if claim["kind"] == "claim" and not claim["inputs"]:
+            verdict = (f"Nothing in the agent's context could have produced this {what}. "
+                       "It came from the model's own knowledge, so no evidence can prove or disprove it.")
+            proven = False
+        elif not drivers:
+            verdict = f"Hiding the inputs, one at a time and in pairs, never changes this {what}. No single piece of evidence explains it."
+            proven = False
+        else:
+            singles_changed = any(r["changed"] for r in rows if r["kind"] == "hide" and len(r["hidden"]) == 1)
+            if not singles_changed and len(drivers) > 1:
+                # redundant causes: only hiding them together changes the outcome
+                verdict = f"Hiding {' and '.join(drivers)} together changes this {what}; hiding either one alone does not, because each is enough on its own."
+            else:
+                verdict = f"Hiding {' or hiding '.join(drivers)} changes this {what}"
+                verdict += "; hiding anything else does not." if hidden_ok else "."
+            proven = True
+            # follow replaced links down to the retired source
+            chain, cur = [], claim["id"]
+            while claims and cur in claims and claims[cur].get("replaced_via"):
+                cur = claims[cur]["replaced_via"][0]
+                chain.append(cur)
+                if cur in evidence:
+                    break
+            if len(chain) > 1:
+                src = evidence.get(chain[-1])
+                hops = [self._label(n, evidence) for n in chain]
+                tail = f" (retired {fmt_day(src['retired_on'])})" if src and src.get("retired_on") else ""
+                verdict += f" {hops[0][0].upper() + hops[0][1:]} rests on " + ", which rests on ".join(hops[1:]) + tail + "."
+            if swap_row and swap_row["changed"]:
+                verdict += f" Swapping in the current version changes it to \u201c{swap_row['text']}\u201d, so the replaced source is the cause."
+            elif swap_row:
+                verdict += " Swapping in the current version leaves it unchanged, so the replaced source did not matter here."
+        return {"rows": rows, "reruns": reruns, "model_calls": calls, "verdict": verdict, "proven": proven,
+                "cause_confirmed": bool(swap_row and swap_row["changed"])}
 
     def supports(self, claim_text: str, evidence_text: str) -> bool:
         """Cheap corroboration check: enough shared content words.
@@ -219,6 +301,10 @@ class Analyzer:
             first = min(bad, key=lambda c: c["step"])
             entered = min(evidence[e]["step"] for e in first["replaced_via"] if e in evidence) if any(e in evidence for e in first["replaced_via"]) else first["step"]
             first_wrong = {"step": entered, "agent": self.wf.step(entered).agent, "label": self.wf.step(entered).label}
+
+        for cid, c in claims.items():
+            a = attr[cid]
+            c["proof"] = self.proof(run, c, a["experiments"], a["drove"], evidence, replay_info, claims)
 
         report = {
             "version": REPORT_VERSION,
