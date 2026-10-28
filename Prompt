@@ -1,0 +1,140 @@
+Rebuild the Decision page of this project (Supersede, a decision-provenance tool for AI agents) to match the layout below exactly.
+
+HARD RULES
+- React + TypeScript, plain CSS in frontend/src/styles.css. No UI frameworks, no Tailwind, no CSS-in-JS libraries, no new npm packages.
+- Do NOT change EvidenceGraph.tsx, layout.ts, api.ts, types.ts or anything in backend/. Render the existing <EvidenceGraph> inside the new dark card as it is today.
+- Use real data from the existing API wherever it exists (run, claims, evidence, findings, replay, stability, said-vs-did, chat). The example text below is the KYC-2041 demo run; use it only as the expected output and as fallback copy.
+- Keep my existing chat logic ("Ask about this run") and move it into the new panel.
+- Put all new CSS under the comment "/* Decision page v5 */" with class names prefixed "dp-". New components: frontend/src/components/IconRail.tsx, frontend/src/components/ExplainPanel.tsx.
+
+DESIGN TOKENS (add as CSS variables on :root)
+--page #EEF1EF; --surface #FFFFFF; --border #DCE2DF; --divider #E7ECEA; --control-border #C9D2CF;
+--text #13201F; --text-2 #3E4B4A; --muted #5E6B6A; --quote #2A3736;
+--risk #C2412F; --risk-bg #FCE9E5; --risk-soft #FFF6F4; --risk-line #F3D3CC;
+--ok #0E5F55; --ok-bg #E3F4EF; --ok-soft #F3FAF8; --ok-line #CDE9E1;
+--accent #FF6A55 (primary button only);
+Dark canvas: --ink #0E1D21; --ink-2 #172D33; --ink-line #24414A; --ink-border #2F4E56; --ink-divider #1E363C; --ink-text #E6EEEC; --ink-strong #F4F7F6; --ink-muted #8FA6AB; --ink-soft #B9CACC; --teal #43C6AC; --coral-text #FF8A78; --amber #F2B441.
+Fonts: "Public Sans" (400/500/600/700) for UI, "Source Serif 4" (400/500, italic 400) for headlines, analyst text and quotes. Load from Google Fonts in index.html. Use font-variant-numeric: tabular-nums on body.
+Focus ring on every interactive element: outline 2px solid #43C6AC, offset 2px. Respect prefers-reduced-motion.
+
+OVERALL LAYOUT
+body background var(--page). Page = flex row: [IconRail 72px] [content column].
+Content column = Top bar, then a body area with padding 20px 24px 28px, gap 20px, flex row, align-items flex-start:
+  - Main column: flex 1 1 640px, min-width 0, flex column, gap 16px.
+  - ExplainPanel: flex 0 0 380px, position sticky, top 16px, height calc(100vh - 32px - top bar height) (about 1010px on a 1440x1120 screen).
+
+1) ICON RAIL (IconRail.tsx)
+- 72px wide, white, border-right 1px var(--border), flex column, items centered, gap 6px, padding 14px 0.
+- Top: 28px logo mark: dark rounded square (#0E1D21, radius 6) with a coral dot bottom-left, a teal dot top-right and a light line joining them. 14px margin below.
+- Four nav items, each 60px wide, padding 8px 0, radius 10px, column with a 20px line icon above an 11px label: Projects, Runs (active), Sources, History.
+- Active item: background var(--page), text var(--text), weight 600, aria-current="page". Inactive: var(--muted). Wrap it in <nav aria-label="Main">.
+
+2) TOP BAR
+- White, border-bottom 1px var(--border), padding 14px 24px, flex wrap, space-between, gap 12px 24px.
+- Left:
+  - Breadcrumb 12.5px muted, links in var(--ok): "Release review / Runs / KYC-2041".
+  - Row (baseline aligned, gap 12px): h1 "Meridian Ledger LLC" 19px bold; meta "KYC onboarding, 15 Oct 2026, 6 steps, 3 agents" 13px muted; badge "Decision built on a retired policy" (pill, padding 3px 9px, bg var(--risk-bg), color var(--risk), 12px bold).
+- Right: two 40px-high buttons, radius 8px, 13.5px:
+  - "Export for compliance": white, 1px var(--control-border) border, weight 600.
+  - "Prove this decision": bg var(--accent), white, weight 700, followed by "6 re-runs" at weight 500 and 85% opacity. It opens the existing ProofDialog.
+
+3) DARK GRAPH CARD (main column, first item)
+- section aria-label "Decision graph", bg var(--ink), text var(--ink-text), radius 16px, overflow hidden.
+- Header row (padding 20px 24px 4px, space-between, wrap, gap 14px):
+  - Left (max-width 520px): h2 in Source Serif 4, 26px, weight 500, line-height 1.2, color var(--ink-strong): "Approved on a policy retired 106 days earlier." Below it, a 13px var(--ink-muted) paragraph: "First went wrong at step 3, when the Risk agent read a replaced source. Every step still reported success."
+  - Right: label "Run version" (11.5px muted), then a segmented control (role="group", padding 3px, radius 10px, bg var(--ink-2), border 1px var(--ink-line)) with two 36px buttons using aria-pressed: "As it ran" (active: bg var(--ink-strong), text var(--ink)) and "Replay with current versions" (inactive: transparent, var(--ink-soft)). This single control replaces both the old "As the agents ran it / With current versions" toggle and the old "Branches" row. It switches the graph between the original run and the replay fork.
+- Toolbar row (padding 12px 24px 0, space-between, wrap, gap 10px):
+  - Left: two 34px outline buttons (border 1px var(--ink-border), radius 8px, 12.5px semibold, 14px icon + text + count pill):
+    - "Filter inputs" with a pill "all" (bg var(--ink-line)).
+    - "Safety stops" with a pill "4 on" (bg #3A2621, text var(--coral-text)).
+    These replace the old icon-only filter/pause buttons and open the same menus as before.
+  - Right: view toggle "Graph" (active, border var(--ink-muted)) and "Table" (inactive, border var(--ink-line)), 34px, aria-pressed.
+- Graph area: horizontally scrollable wrapper, padding 0 16px, containing the existing <EvidenceGraph> unchanged (it already draws the dotted-grid background, columns Evidence / Document agent / Risk agent / Decision agent / Outcome, and the coral path).
+- Legend row (replaces the old info button; padding 4px 24px 12px, wrap, gap 6px 18px, 12px var(--ink-soft)), each item = small swatch + text:
+  - teal ring "Current evidence";
+  - coral ring "Replaced, or built on replaced";
+  - dashed amber rectangle "No source";
+  - 16x3 coral bar "What the decision depended on";
+  - plain muted text "Bigger circle = mattered more".
+- Step scrubber (border-top 1px var(--ink-divider), padding 14px 24px 8px, flex, gap 16px):
+  - A 44px round play button (bg var(--ink-strong), dark play triangle, aria-label "Play the run step by step").
+  - An ordered list in a 6-column grid, gap 6px, 11.5px. Each step has a 4px rounded bar, then the step name and "time, tokens" in muted text. Bars are teal for steps before the first wrong step and coral from it onward. The first wrong step has a 10px coral diamond on the left of its bar, bold coral name, and "first went wrong" instead of the time.
+  - Demo steps:
+    1. Parse documents, 1.4 s, 81 tok
+    2. Sanctions check, 1.5 s, 82 tok
+    3. Retrieve EDD policy, first went wrong
+    4. Score risk, 1.1 s, 119 tok
+    5. Check volume, 1.0 s, 68 tok
+    6. Decide, 2.7 s, 339 tok (bold)
+- Footer row (padding 6px 24px 16px, space-between, 12.5px muted):
+  - "Whole run: 8.9 s, 805 tokens, 7 model calls".
+  - Two 34px outline buttons: "All steps" and "What the agents knew at step 6" (the latter opens the existing StateDrawer at the current step; renamed from "Inspect state at step 6").
+
+4) TWO CHECK CARDS (main column, under the graph)
+- 2-column grid, gap 16px. Each card: white, 1px var(--border), radius 12px, padding 18px, flex column, gap 12px. Header row: h2 15px bold on the left, a small label or badge on the right.
+- Card A, "What the agent said vs what it did":
+  - Badge "Does not match" (pill, var(--risk-bg) / var(--risk), 11.5px bold).
+  - Inside, a 2-column grid, gap 10px:
+    - "It said" box: bg var(--page), radius 10px, padding 12px; 12px muted label, then a Source Serif italic 14px quote: "I checked the latest Enhanced Due Diligence policy and the sanctions screening."
+    - "The re-runs show" box: bg var(--risk-soft), border 1px var(--risk-line); label in var(--risk) 600; 13.5px text: "It used EDD Policy v3, which is retired. The sanctions check did not affect the decision."
+  - Link "See all 5 differences found" (13px, 600).
+- Card B, "Would it decide the same again?":
+  - Right label "6 re-samples" (12px muted).
+  - A big "6 of 6" (30px bold) followed by "approved again" (14px var(--text-2)).
+  - A 10px stacked bar, radius 5px, track #E7ECEA, filled with var(--text) in proportion to the samples.
+  - 13px text: "Stable, but stable on a retired policy. Consistency alone does not make the decision right."
+
+5) EXPLAIN PANEL (ExplainPanel.tsx), the right side
+- <aside aria-label="Explain this run">: white, 1px var(--border), radius 12px, overflow hidden, flex column, width 380px.
+- A) Pinned verdict header (never inside a tab; padding 16px 18px 14px; border-bottom 1px var(--divider)):
+  - "Verdict" (12px muted).
+  - Serif 18px, line-height 1.35, margin 3px 0 10px: "Approved on retired EDD Policy v3."
+  - Row, gap 8px, 12.5px: pill "Approve" (var(--risk-bg)/var(--risk), bold), a small right-arrow icon in muted, pill "Escalate to EDD" (var(--ok-bg)/var(--ok), bold), then muted text "with current versions".
+- B) Tab bar (role="tablist", padding 0 18px, border-bottom 1px var(--divider)):
+  - Three role="tab" buttons, 42px tall, padding 0 4px, margin-right 18px, transparent, 13.5px semibold.
+  - Active tab: color var(--text) and box-shadow inset 0 -2px 0 var(--text). Inactive: var(--muted).
+  - Labels: "Summary", "Selected · <short name of selected node>" (e.g. "Selected · EDD v3"; when nothing is selected show "Selected", disabled, with title "Click something in the graph"), and "Ask".
+  - "Ask" shows a coral count pill (bg var(--accent), white, 11px) when an answer arrives while another tab is open; clear it when Ask opens.
+  - Support Left/Right arrow keys, aria-selected and aria-controls.
+- C) Tab panels (role="tabpanel"; flex 1 1 auto; overflow auto; padding 16px 18px). Keep all three mounted and hide inactive ones with the hidden attribute, so chat history and typed text survive tab switches.
+
+  SUMMARY (default), flex column, gap 18px:
+  - h3 13px bold "What happened", then the analyst read in Source Serif 15.5px, line-height 1.55. Demo: "The approval rests on claim 04, which rests on claim 03, which came from EDD Policy v3. That version stopped applying on 1 Jul 2026, 106 days before this run. Replaying with v4, which adds virtual asset service providers, changes the decision from approve to escalate."
+  - h3 "Decision", then a <dl> in a 2-column grid (auto 1fr), gap 8px 14px, 13px. dt is muted, dd is 600:
+    - As it ran: Approve account
+    - With current versions: Escalate to EDD (in var(--ok))
+    - First went wrong: Step 3, Risk agent
+    - Out of date by: 106 days
+    - Cause: Confirmed by 6 re-runs
+  - h3 "Evidence behind it", then chips (32px, radius 6px, 12.5px). The problem source chip uses var(--risk-soft) bg, var(--risk-line) border, var(--risk) text, 600. Others are white with var(--control-border). Demo chips: "EDD Policy v3 §2.1", "Retrieval at step 3", "Replay run". Clicking a chip selects that node in the graph. Under them, 12px muted: "Click a chip to highlight it in the graph."
+
+  SELECTED, flex column, gap 14px:
+  - Header row: 12px muted "Source document, read at step 3" (or the node's type and step), h3 16px bold node name ("EDD Policy v3 §2.1"), and on the right a status badge with a word, never colour alone ("Retired" in risk colours, "Current" in ok colours).
+  - blockquote: padding-left 12px, border-left 2px var(--risk) (var(--ok) if current), Source Serif 14.5px, line-height 1.55, var(--quote). Demo: "Escalate to EDD: money services businesses, casinos and dealers in precious metals."
+  - Fact row: 3-column grid, 12.5px, padding 12px 0, top and bottom border var(--divider); muted label above a bold value: Replaced / 1 Jul 2026; Fed into / Claim 03; Read by / Risk agent.
+  - "Replaced by" (h3 13px bold): a box with padding 10px 12px, radius 10px, border var(--ok-line), bg var(--ok-soft). Top row: bold "EDD Policy v4 §2.1" and on the right "In force" (11.5px bold var(--ok)). Then serif 14px: "Adds virtual asset service providers, including digital asset custody." Only show this block when the node has a newer version.
+  - "How much it mattered" (h3): 13px var(--text-2), from the attribution data. Demo: "Hiding this source changes claim 03 completely. Swapping in v4 changes the final decision."
+  - Bottom (margin-top auto), two 38px buttons, radius 8px, 13px 600:
+    - "Prove this" (bg var(--ink), white): uses the existing onProve.
+    - "Ask about this source" (white outline): switches to the Ask tab and pre-fills "Tell me about EDD Policy v3 §2.1".
+
+  ASK (panel padding 0; flex column; min-height 0):
+  - Caption bar (padding 10px 18px, 12px muted, border-bottom var(--divider)): "Answers come only from this run's claims, evidence, replays and findings."
+  - Message list (flex 1, overflow auto, padding 14px 18px, gap 12px, bg #FAFBFA, justify-content flex-end; auto-scroll to the newest message):
+    - User bubble: right aligned, max-width 85%, padding 9px 12px, radius 12px 12px 4px 12px, bg var(--text), white, 13.5px.
+    - Answer bubble: left aligned, max-width 92%, padding 11px 13px, radius 12px 12px 12px 4px, white, 1px var(--border), 13.5px, line-height 1.5. It can end with small action chips (padding 3px 8px, radius 6px, 1px var(--control-border), 11.5px), e.g. "Show in graph: EDD v3" (selects the node and switches to Selected), "Step 3 state" (opens the StateDrawer), "Open replay run" (switches Run version to replay).
+    - While waiting, show an answer bubble that says "Thinking…" and disable Send.
+  - Footer (padding 12px 18px 16px, border-top var(--divider), gap 10px):
+    - Suggestion chips (32px, pill, white, 1px var(--control-border), 12.5px): "Why was this decided?", "Is claim 05 safe?" (and "What changes on replay?" if it fits). Clicking one sends it.
+    - Input row: border 1px var(--control-border), radius 10px, padding 4px 4px 4px 12px. A borderless text input (14px, aria-label "Ask a question", placeholder "Ask a question about this run") and a 36px "Send" button (bg var(--ink), white, radius 8px, 13px 600). Enter sends.
+
+BEHAVIOUR
+- Clicking any node in the graph sets the selection and switches the panel to the Selected tab.
+- Remember the last open tab per run id in localStorage, wrapped in try/catch; default to Summary.
+- The "Run version" control drives the same state that the old toggle and Branches used.
+
+RESPONSIVE
+- Below 1100px: ExplainPanel is no longer sticky; it moves under the main column at full width with min-height 520px.
+- Below 720px: the two check cards stack into one column, the step grid becomes horizontally scrollable, and the top-bar buttons wrap under the title.
+
+When done, run `npm run typecheck` and fix every error. Then list the files you changed.
